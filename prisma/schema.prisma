@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+  sessions     Session[]
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  userId    String
+  token     String   @unique
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+  user      User     @relation(fields: [userId], references: [id])
+  conversations Conversation[]
+  adEvents  AdEvent[]
+}
+
+model Conversation {
+  id        String   @id @default(uuid())
+  sessionId String
+  title     String?
+  createdAt DateTime @default(now())
+  session   Session  @relation(fields: [sessionId], references: [id])
+  messages  Message[]
+}
+
+model Message {
+  id             String   @id @default(uuid())
+  conversationId String
+  role           String
+  content        String
+  adMode         String   @default("no-ad")
+  adProductName  String?
+  adCategory     String?
+  adProductUrl   String?
+  adProductDesc  String?
+  createdAt      DateTime @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  adEvents       AdEvent[]
+}
+
+model AdEvent {
+  id         String   @id @default(uuid())
+  sessionId  String
+  messageId  String
+  adMode     String
+  eventType  String
+  durationMs Int?
+  metadata   Json?
+  timestamp  DateTime @default(now())
+  session    Session  @relation(fields: [sessionId], references: [id])
+  message    Message  @relation(fields: [messageId], references: [id])
+}
