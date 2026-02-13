@@ -39,6 +39,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
         sendMessage,
         stopGeneration,
         clearMessages,
+        setMessages,
     } = useChat(activeConversationId);
 
     // Fetch conversations on mount
@@ -86,13 +87,14 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
             try {
                 const res = await fetch(`/api/conversations/${id}/messages`);
                 if (res.ok) {
-                    // Messages will be loaded via the API
+                    const data = await res.json();
+                    setMessages(data.messages);
                 }
             } catch (e) {
                 console.error("Failed to load messages:", e);
             }
         },
-        [clearMessages]
+        [clearMessages, setMessages]
     );
 
     const handleSendMessage = useCallback(
