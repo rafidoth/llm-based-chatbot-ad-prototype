@@ -25,32 +25,15 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
     );
 
     return (
-        <div className={`group py-5 ${isUser ? "" : ""}`}>
+        <div className={`group py-5`}>
             <div className="mx-auto max-w-3xl px-4">
-                <div className="flex gap-4">
-                    {/* Avatar */}
-                    <div
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${isUser
-                                ? "bg-gradient-to-br from-blue-500 to-purple-600"
-                                : "bg-gradient-to-br from-emerald-500 to-teal-600"
-                            }`}
-                    >
-                        {isUser ? (
-                            <User size={16} className="text-white" />
-                        ) : (
-                            <Bot size={16} className="text-white" />
-                        )}
-                    </div>
-
+                <div className={`flex gap-4 ${isUser ? "flex-row-reverse" : ""}`}>
                     {/* Message content */}
-                    <div className="min-w-0 flex-1 space-y-2">
-                        <div className="text-xs font-medium uppercase tracking-wider text-zinc-500">
-                            {isUser ? "You" : "Assistant"}
-                        </div>
+                    <div className={`min-w-0 flex-1 space-y-2 ${isUser ? "text-right" : ""}`}>
 
                         <div
                             ref={isInResp ? inRespRef : undefined}
-                            className={`prose prose-invert max-w-none text-sm leading-relaxed text-zinc-200 ${message.isStreaming ? "streaming-cursor" : ""
+                            className={`${isUser ? "bg-green-800 text-white rounded-2xl p-3 w-fit ml-auto" : ""} prose prose-invert max-w-none text-sm leading-relaxed text-zinc-200 ${message.isStreaming ? "streaming-cursor" : ""
                                 }`}
                         >
                             <ReactMarkdown remarkPlugins={[remarkGfm]}>

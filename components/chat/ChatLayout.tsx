@@ -190,7 +190,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
                             </button>
                         </div>
                         <h1 className="text-sm font-medium text-zinc-300">
-                            ChatBot Research
+                            Just a Chatbot
                         </h1>
                     </div>
                 </header>
