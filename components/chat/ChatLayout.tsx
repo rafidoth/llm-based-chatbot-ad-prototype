@@ -32,6 +32,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
         string | null
     >(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [isLoadingConversation, setIsLoadingConversation] = useState(false);
 
     const {
         messages,
@@ -68,6 +69,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
         async (id: string) => {
             setActiveConversationId(id);
             clearMessages();
+            setIsLoadingConversation(true);
 
             // Load existing messages for this conversation
             try {
@@ -78,6 +80,8 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
                 }
             } catch (e) {
                 console.error("Failed to load messages:", e);
+            } finally {
+                setIsLoadingConversation(false);
             }
         },
         [clearMessages, setMessages]
@@ -186,7 +190,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
                 </header>
 
                 {/* Messages */}
-                <MessageList messages={messages} sessionId={sessionId} />
+                <MessageList messages={messages} sessionId={sessionId} isLoadingConversation={isLoadingConversation} />
 
                 {/* Input */}
                 <ChatInput

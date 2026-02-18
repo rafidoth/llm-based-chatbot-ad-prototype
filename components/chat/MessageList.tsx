@@ -1,20 +1,30 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { ChatMessage } from "@/hooks/useChat";
 import { MessageBubble } from "./MessageBubble";
 
 interface MessageListProps {
     messages: ChatMessage[];
     sessionId: string;
+    isLoadingConversation?: boolean;
 }
 
-export function MessageList({ messages, sessionId }: MessageListProps) {
+export function MessageList({ messages, sessionId, isLoadingConversation }: MessageListProps) {
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages]);
+
+    if (isLoadingConversation) {
+        return (
+            <div className="flex flex-1 flex-col items-center justify-center">
+                <Loader2 size={32} className="animate-spin text-zinc-500" />
+            </div>
+        );
+    }
 
     if (messages.length === 0) {
         return (
