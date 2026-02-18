@@ -61,7 +61,7 @@ export function ChatInput({ onSend, onStop, isLoading }: ChatInputProps) {
                     {isLoading ? (
                         <button
                             onClick={onStop}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-600 text-zinc-200 transition-colors hover:bg-zinc-500"
+                            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-zinc-600 text-zinc-200 transition-colors hover:bg-zinc-500"
                             aria-label="Stop generating"
                         >
                             <Square size={14} fill="currentColor" />
@@ -70,7 +70,7 @@ export function ChatInput({ onSend, onStop, isLoading }: ChatInputProps) {
                         <button
                             onClick={handleSubmit}
                             disabled={!input.trim()}
-                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-zinc-100 text-zinc-900 transition-all hover:bg-white disabled:bg-zinc-700 disabled:text-zinc-500"
+                            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-zinc-100 text-zinc-900 transition-all hover:bg-white disabled:bg-zinc-700 disabled:text-zinc-500 disabled:cursor-default"
                             aria-label="Send message"
                         >
                             <ArrowUp size={16} strokeWidth={2.5} />
