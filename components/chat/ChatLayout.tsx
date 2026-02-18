@@ -136,7 +136,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
             {/* Mobile sidebar toggle */}
             <button
                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="fixed left-3 top-3 z-50 rounded-lg bg-zinc-800 p-2 text-zinc-400 transition-colors hover:text-zinc-200 lg:hidden"
+                className="fixed left-3 top-3 z-50 cursor-pointer rounded-lg bg-zinc-800 p-2 text-zinc-400 transition-colors hover:text-zinc-200 lg:hidden"
             >
                 {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -174,7 +174,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
                         <div className="hidden lg:block">
                             <button
                                 onClick={() => setSidebarOpen(!sidebarOpen)}
-                                className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+                                className="cursor-pointer rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
                             >
                                 <Menu size={18} />
                             </button>
