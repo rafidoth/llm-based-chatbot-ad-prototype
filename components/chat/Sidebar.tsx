@@ -31,7 +31,7 @@ export function Sidebar({
             <div className="p-3">
                 <button
                     onClick={onNewChat}
-                    className="flex w-full items-center gap-2 rounded-xl border border-zinc-700/50 px-4 py-3 text-sm text-zinc-300 transition-all hover:bg-zinc-800 hover:text-zinc-100"
+                    className="flex w-full cursor-pointer items-center gap-2 rounded-xl border border-zinc-700/50 px-4 py-3 text-sm text-zinc-300 transition-all hover:bg-zinc-800 hover:text-zinc-100"
                 >
                     <MessageSquarePlus size={16} />
                     New Chat
@@ -45,9 +45,9 @@ export function Sidebar({
                         <button
                             key={conv.id}
                             onClick={() => onSelectConversation(conv.id)}
-                            className={`group flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${activeConversationId === conv.id
-                                    ? "bg-zinc-800 text-zinc-100"
-                                    : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300"
+                            className={`group flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${activeConversationId === conv.id
+                                ? "bg-zinc-800 text-zinc-100"
+                                : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-300"
                                 }`}
                         >
                             <span className="truncate flex-1">
@@ -69,7 +69,7 @@ export function Sidebar({
                     </div>
                     <button
                         onClick={onLogout}
-                        className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+                        className="cursor-pointer rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
                         aria-label="Logout"
                     >
                         <LogOut size={16} />
