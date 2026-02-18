@@ -26,8 +26,9 @@ export function useChat(conversationId: string | null) {
     const abortControllerRef = useRef<AbortController | null>(null);
 
     const sendMessage = useCallback(
-        async (content: string) => {
-            if (!conversationId || !content.trim() || isLoading) return;
+        async (content: string, overrideConversationId?: string) => {
+            const effectiveConversationId = overrideConversationId || conversationId;
+            if (!effectiveConversationId || !content.trim() || isLoading) return;
 
             const userMessage: ChatMessage = {
                 id: `user-${Date.now()}`,
@@ -54,7 +55,7 @@ export function useChat(conversationId: string | null) {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                         message: content.trim(),
-                        conversationId,
+                        conversationId: effectiveConversationId,
                     }),
                     signal: controller.signal,
                 });
