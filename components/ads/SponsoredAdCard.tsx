@@ -48,7 +48,7 @@ export function SponsoredAdCard({
                         setIsDismissed(true);
                         onDismiss();
                     }}
-                    className="rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-700 hover:text-zinc-300"
+                    className="cursor-pointer rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-700 hover:text-zinc-300"
                     aria-label="Dismiss ad"
                 >
                     <X size={14} />
@@ -69,7 +69,7 @@ export function SponsoredAdCard({
                         href={product.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-lg bg-amber-500/20 px-3 py-1.5 text-xs font-medium text-amber-300 transition-all hover:bg-amber-500/30 hover:text-amber-200"
+                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-amber-500/20 px-3 py-1.5 text-xs font-medium text-amber-300 transition-all hover:bg-amber-500/30 hover:text-amber-200"
                     >
                         Learn More
                         <ExternalLink size={11} />
