@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ChatBot Research",
+  title: "r5Chat",
   description: "Research prototype for studying participant behavior towards ads in a ChatGPT-like chatbot",
 };
 
