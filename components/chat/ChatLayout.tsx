@@ -59,23 +59,9 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
         fetchConversations();
     }, [fetchConversations]);
 
-    const handleNewChat = useCallback(async () => {
-        try {
-            const res = await fetch("/api/conversations", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ title: "New Chat" }),
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setConversations((prev) => [data.conversation, ...prev]);
-                setActiveConversationId(data.conversation.id);
-                clearMessages();
-            }
-        } catch (e) {
-            console.error("Failed to create conversation:", e);
-        }
+    const handleNewChat = useCallback(() => {
+        setActiveConversationId(null);
+        clearMessages();
     }, [clearMessages]);
 
     const handleSelectConversation = useCallback(
@@ -110,14 +96,16 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
 
                     if (res.ok) {
                         const data = await res.json();
+                        const newId = data.conversation.id;
                         setConversations((prev) => [data.conversation, ...prev]);
-                        setActiveConversationId(data.conversation.id);
+                        setActiveConversationId(newId);
 
-                        // Need to wait for state to update, then send
-                        // We'll use the conversation id directly
-                        setTimeout(() => {
-                            sendMessage(content);
-                        }, 100);
+                        // Pass the new conversation ID directly to avoid
+                        // waiting for React state to propagate
+                        await sendMessage(content, newId);
+
+                        // Refresh conversation list to get updated titles
+                        fetchConversations();
                         return;
                     }
                 } catch (e) {
@@ -129,9 +117,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
             await sendMessage(content);
 
             // Refresh conversation list to get updated titles
-            setTimeout(() => {
-                fetchConversations();
-            }, 1000);
+            fetchConversations();
         },
         [activeConversationId, sendMessage, fetchConversations]
     );
@@ -157,7 +143,9 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
 
             {/* Sidebar */}
             <div
-                className={`fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 ease-in-out lg:relative lg:translate-x-0 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                className={`fixed inset-y-0 left-0 z-40 transition-all duration-200 ease-in-out lg:relative ${sidebarOpen
+                    ? "translate-x-0"
+                    : "-translate-x-full lg:translate-x-0 lg:w-0 lg:overflow-hidden"
                     }`}
             >
                 <Sidebar
@@ -192,7 +180,7 @@ export function ChatLayout({ user, sessionId }: ChatLayoutProps) {
                             </button>
                         </div>
                         <h1 className="text-sm font-medium text-zinc-300">
-                            Just a Chatbot
+                            r5Chat
                         </h1>
                     </div>
                 </header>
