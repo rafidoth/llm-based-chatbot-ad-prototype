@@ -26,6 +26,7 @@ model Session {
   user      User     @relation(fields: [userId], references: [id])
   conversations Conversation[]
   adEvents  AdEvent[]
+  feedbacks Feedback[]
 }
 
 model Conversation {
@@ -52,6 +53,7 @@ model Message {
   createdAt      DateTime @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id])
   adEvents       AdEvent[]
+  feedbacks      Feedback[]
 }
 
 model AdEvent {
@@ -65,4 +67,14 @@ model AdEvent {
   timestamp  DateTime @default(now())
   session    Session  @relation(fields: [sessionId], references: [id])
   message    Message  @relation(fields: [messageId], references: [id])
+}
+
+model Feedback {
+  id        String   @id @default(uuid())
+  messageId String
+  sessionId String
+  content   String
+  createdAt DateTime @default(now())
+  message   Message  @relation(fields: [messageId], references: [id])
+  session   Session  @relation(fields: [sessionId], references: [id])
 }

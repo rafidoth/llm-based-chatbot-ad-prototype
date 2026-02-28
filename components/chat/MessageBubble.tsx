@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/hooks/useChat";
 import { SponsoredAdCard } from "@/components/ads/SponsoredAdCard";
 import { useAdTracking } from "@/hooks/useAdTracking";
+import { MessageActions } from "./MessageActions";
 
 const REMARK_PLUGINS = [remarkGfm];
 
@@ -194,6 +195,16 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
                                     adMode="out-resp"
                                 />
                             )}
+
+                        {/* Message actions (vote, copy, feedback) for assistant messages */}
+                        {!isUser && !message.isStreaming && (
+                            <MessageActions
+                                messageId={message.adData?.messageId || message.id}
+                                messageContent={contentToRender}
+                                sessionId={sessionId}
+                                adMode={message.adMode || "no-ad"}
+                            />
+                        )}
                     </div>
                 </div>
             </div>

@@ -10,7 +10,7 @@ import {
 } from "@/lib/products";
 import { SYS_SELECT_CATEGORY, SYS_INTEREST_DESC, SYS_DEFAULT, SYS_AD_COPY } from "@/lib/prompts";
 
-const MODEL = "llama-3.3-70b-versatile";
+const MODEL = "openai/gpt-oss-120b";
 
 export async function POST(req: NextRequest) {
     try {

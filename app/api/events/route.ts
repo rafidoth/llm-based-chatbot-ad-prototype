@@ -14,6 +14,8 @@ const eventSchema = z.object({
         "mouseover_start",
         "mouseover_end",
         "dismiss",
+        "vote_up",
+        "vote_down",
     ]),
     durationMs: z.number().optional(),
     metadata: z.record(z.string(), z.unknown()).optional(),
