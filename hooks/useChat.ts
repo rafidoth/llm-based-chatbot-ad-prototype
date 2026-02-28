@@ -15,6 +15,8 @@ export interface ChatMessage {
             url: string;
             desc: string;
             category: string;
+            headline: string;
+            description: string;
         };
     } | null;
     isStreaming?: boolean;
@@ -195,9 +197,16 @@ export function useChat(conversationId: string | null) {
 /**
  * Clean the Vercel AI SDK data stream format
  * The SDK sends lines like: 0:"text chunk"\n
- * We extract the actual text from these lines
+ * We extract the actual text from these lines.
+ * If the stream is plain text (from toTextStreamResponse), return as-is.
  */
 function cleanStreamText(raw: string): string {
+    // Quick check: if this doesn't contain protocol markers, it's plain text
+    if (!raw.match(/^0:"/m)) {
+        return raw;
+    }
+
+    // Parse protocol format
     const lines = raw.split("\n");
     let result = "";
 
@@ -227,12 +236,6 @@ function cleanStreamText(raw: string): string {
             }
         }
         // Other lines (like e:, d:, etc.) are metadata, skip them
-        else if (/^[a-f0-9]+:/.test(line)) {
-            // Skip metadata lines
-        } else if (line.trim()) {
-            // Keep any non-protocol text
-            result += line;
-        }
     }
 
     return result;

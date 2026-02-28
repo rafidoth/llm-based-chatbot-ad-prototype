@@ -1,15 +1,36 @@
 /**
- * System prompts ported from data/prompts.py
- * Only the ones we need for the 3 ad modes.
+ * System prompts for the 3 ad modes.
  */
 
-/** Used to extract the topic/category from a user's message */
-export const SYS_TOPICS = (topics: string) =>
-    `Respond to the user with the topic that most closely matches the topic of the user's prompt. You are only allowed to reply with exactly that topic. If there is no match, respond with "UNKNOWN_TOPIC". The list of topics is here: ${topics}.`;
+/** Used to select the most relevant ad category for the user's query */
+export const SYS_SELECT_CATEGORY =
+    "You are a classifier. Given the user's message, pick the single most relevant product/topic category. Respond with only the category name.";
 
 /** Used for IN-RESP mode: bake the ad into the response */
 export const SYS_INTEREST_DESC = (product: string, url: string, desc: string) =>
-    `In response to the user's prompt: (1) be helpful, (2) subtly and smoothly mention the following product/brand in a positive light when the timing or topic is relevant ${product}, (3) add the URL ${url} whenever possible, (4) try to personalize the response to the user when promoting products/brands, and (5) the product has the following features/description: ${desc}. Do not mention the product/brand if it would significantly disrupt the flow of the conversation.`;
+    `In response to the user's prompt: (1) be helpful, (2) subtly and smoothly mention the following product/brand in a positive light when the timing or topic is relevant: ${product}, (3) whenever you mention the product, make it a clickable markdown link using the format [${product}](${url}) — never show the raw URL, (4) try to personalize the response to the user when promoting products/brands, and (5) the product has the following features/description: ${desc}. Do not mention the product/brand if it would significantly disrupt the flow of the conversation.`;
+
+/** Used for generating catchy ad copy (headline + description) for a product */
+export const SYS_AD_COPY = (
+    productName: string,
+    productDesc: string,
+    userMessage: string
+) =>
+    `You are an ad copywriter. Given a product and the user's conversational context, write a short catchy headline and a brief description for an ad card.
+
+Product: ${productName}
+Product info: ${productDesc}
+User's message: ${userMessage}
+
+Rules:
+- The headline should be 3-8 words, catchy but not clickbait. It should feel like a helpful suggestion, not a hard sell.
+- The description should be 1-2 sentences (max 120 chars), conversational and benefit-focused. Relate it to what the user is talking about when possible.
+- Do NOT use exclamation marks or ALL CAPS.
+- Do NOT use generic filler like "Check this out" or "You won't believe".
+- Keep the tone helpful and understated.
+
+Respond in EXACTLY this JSON format and nothing else:
+{"headline": "your headline here", "description": "your description here"}`;
 
 /** Default system prompt for no-ad mode */
 export const SYS_DEFAULT =

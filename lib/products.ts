@@ -37,24 +37,3 @@ export function getRandomProductFromCategory(category: string): Product | null {
     return products[Math.floor(Math.random() * products.length)];
 }
 
-export function findBestMatchingCategory(topic: string): string | null {
-    const categories = getAllCategories();
-    const lowerTopic = topic.toLowerCase().trim();
-
-    // Exact match
-    const exact = categories.find(
-        (c) => c.toLowerCase() === lowerTopic
-    );
-    if (exact) return exact;
-
-    // Partial match
-    const partial = categories.find(
-        (c) =>
-            c.toLowerCase().includes(lowerTopic) ||
-            lowerTopic.includes(c.toLowerCase())
-    );
-    if (partial) return partial;
-
-    // If no match, return a random category
-    return categories[Math.floor(Math.random() * categories.length)];
-}
