@@ -1,10 +1,13 @@
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/hooks/useChat";
 import { SponsoredAdCard } from "@/components/ads/SponsoredAdCard";
 import { useAdTracking } from "@/hooks/useAdTracking";
+
+const REMARK_PLUGINS = [remarkGfm];
 
 const markdownComponents: Components = {
     // Paragraphs
@@ -131,6 +134,18 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
     const isUser = message.role === "user";
     const isInResp = message.adMode === "in-resp" && message.adData;
 
+    // Local snapshot of content — only updates when streaming ends
+    const [finalContent, setFinalContent] = useState<string | null>(null);
+    const wasStreaming = useRef(message.isStreaming);
+
+    useEffect(() => {
+        // Capture content the moment streaming stops
+        if (wasStreaming.current && !message.isStreaming) {
+            setFinalContent(message.content);
+        }
+        wasStreaming.current = message.isStreaming;
+    }, [message.isStreaming, message.content]);
+
     // For IN-RESP mode, track the entire message bubble
     const { ref: inRespRef } = useAdTracking(
         isInResp ? message.adData!.product.name : null,
@@ -139,8 +154,10 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
         "in-resp"
     );
 
+    const contentToRender = finalContent ?? message.content ?? "...";
+
     return (
-        <div className={`group py-5`}>
+        <div className="group py-5">
             <div className="mx-auto max-w-3xl px-4">
                 <div className={`flex gap-4 ${isUser ? "flex-row-reverse" : ""}`}>
                     {/* Message content */}
@@ -148,15 +165,21 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
 
                         <div
                             ref={isInResp ? inRespRef : undefined}
-                            className={`${isUser ? "bg-green-800 text-white rounded-2xl p-3 w-fit ml-auto" : ""} max-w-none text-sm text-zinc-200 ${message.isStreaming ? "streaming-cursor" : ""
-                                }`}
+                            className={`${isUser ? "bg-green-800 text-white rounded-2xl p-3 w-fit ml-auto" : ""} max-w-none text-sm text-zinc-200`}
                         >
-                            <ReactMarkdown
-                                remarkPlugins={[remarkGfm]}
-                                components={markdownComponents}
-                            >
-                                {message.content || (message.isStreaming ? "" : "...")}
-                            </ReactMarkdown>
+                            {message.isStreaming ? (
+                                <p className="whitespace-pre-wrap text-zinc-500 leading-7">
+                                    {message.content || ""}
+                                </p>
+                            ) : (
+                                <ReactMarkdown
+                                    key={finalContent}
+                                    remarkPlugins={REMARK_PLUGINS}
+                                    components={markdownComponents}
+                                >
+                                    {contentToRender}
+                                </ReactMarkdown>
+                            )}
                         </div>
 
                         {/* OUT-RESP: Show sponsored ad card below the message */}
