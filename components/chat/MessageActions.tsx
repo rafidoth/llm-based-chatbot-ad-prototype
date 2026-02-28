@@ -67,14 +67,14 @@ export function MessageActions({ messageId, messageContent, sessionId, adMode }:
 
     return (
         <>
-            <div className="flex items-center gap-0.5 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="flex items-center gap-0.5 mt-2">
                 {/* Upvote */}
                 <button
                     onClick={handleUpvote}
                     title="Good response"
                     className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all duration-150 cursor-pointer ${voteState === "up"
-                            ? "text-emerald-400 bg-emerald-500/15"
-                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                        ? "text-emerald-400 bg-emerald-500/15"
+                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
                         }`}
                 >
                     <svg className="h-3.5 w-3.5" fill={voteState === "up" ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -87,8 +87,8 @@ export function MessageActions({ messageId, messageContent, sessionId, adMode }:
                     onClick={handleDownvote}
                     title="Bad response"
                     className={`flex items-center justify-center h-7 w-7 rounded-lg transition-all duration-150 cursor-pointer ${voteState === "down"
-                            ? "text-red-400 bg-red-500/15"
-                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                        ? "text-red-400 bg-red-500/15"
+                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
                         }`}
                 >
                     <svg className="h-3.5 w-3.5" fill={voteState === "down" ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -104,8 +104,8 @@ export function MessageActions({ messageId, messageContent, sessionId, adMode }:
                     onClick={handleCopy}
                     title={copied ? "Copied!" : "Copy message"}
                     className={`flex items-center justify-center h-7 rounded-lg px-1.5 transition-all duration-150 cursor-pointer ${copied
-                            ? "text-emerald-400 bg-emerald-500/15"
-                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
+                        ? "text-emerald-400 bg-emerald-500/15"
+                        : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800"
                         }`}
                 >
                     {copied ? (
