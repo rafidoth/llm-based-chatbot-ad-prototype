@@ -17,6 +17,7 @@ export default async function ChatPage() {
                 email: sessionData.user.email,
             }}
             sessionId={sessionData.session.id}
+            conversationId={null}
         />
     );
 }
