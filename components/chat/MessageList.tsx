@@ -4,6 +4,7 @@ import { useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ChatMessage } from "@/hooks/useChat";
 import { MessageBubble } from "./MessageBubble";
+import { StreamingBubble } from "./StreamingBubble";
 
 interface MessageListProps {
     messages: ChatMessage[];
@@ -61,13 +62,17 @@ export function MessageList({ messages, sessionId, isLoadingConversation }: Mess
     return (
         <div className="flex-1 overflow-y-auto">
             <div className="pb-32 pt-4">
-                {messages.map((message) => (
-                    <MessageBubble
-                        key={message.id}
-                        message={message}
-                        sessionId={sessionId}
-                    />
-                ))}
+                {messages.map((message) =>
+                    message.isStreaming ? (
+                        <StreamingBubble key={message.id} content={message.content} />
+                    ) : (
+                        <MessageBubble
+                            key={message.id}
+                            message={message}
+                            sessionId={sessionId}
+                        />
+                    )
+                )}
                 <div ref={bottomRef} />
             </div>
         </div>
