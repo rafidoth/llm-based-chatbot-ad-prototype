@@ -41,6 +41,8 @@ export async function GET(
                 adCategory: true,
                 adProductUrl: true,
                 adProductDesc: true,
+                adHeadline: true,
+                adDescription: true,
                 createdAt: true,
             },
         });
@@ -61,6 +63,8 @@ export async function GET(
                             url: msg.adProductUrl || "",
                             desc: msg.adProductDesc || "",
                             category: msg.adCategory || "",
+                            headline: msg.adHeadline || "",
+                            description: msg.adDescription || "",
                         },
                     }
                     : null,

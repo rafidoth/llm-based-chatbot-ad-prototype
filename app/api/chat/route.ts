@@ -2,14 +2,13 @@ import { NextRequest } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { groq } from "@/lib/groq";
-import { streamText, generateText } from "ai";
-import { getAdModeForTurn } from "@/config/ad-schedule";
+import { streamText, generateText, Output } from "ai";
+import { getAdModeForTurn, AdTurnMode } from "@/config/ad-schedule";
 import {
     getAllCategories,
-    findBestMatchingCategory,
     getRandomProductFromCategory,
 } from "@/lib/products";
-import { SYS_TOPICS, SYS_INTEREST_DESC, SYS_DEFAULT } from "@/lib/prompts";
+import { SYS_SELECT_CATEGORY, SYS_INTEREST_DESC, SYS_DEFAULT, SYS_AD_COPY } from "@/lib/prompts";
 
 const MODEL = "llama-3.3-70b-versatile";
 
@@ -52,11 +51,18 @@ export async function POST(req: NextRequest) {
             );
         }
 
+        // Fetch user's ad turn mode preference
+        const user = await prisma.user.findUnique({
+            where: { id: sessionData.user.id },
+            select: { adTurnMode: true },
+        });
+        const adTurnMode = (user?.adTurnMode || "randomized") as AdTurnMode;
+
         // Determine ad mode based on number of assistant messages so far
         const assistantCount = conversation.messages.filter(
             (m: { role: string }) => m.role === "assistant"
         ).length;
-        const adMode = getAdModeForTurn(assistantCount);
+        const adMode = getAdModeForTurn(assistantCount, adTurnMode);
 
         // Save user message
         await prisma.message.create({
@@ -131,27 +137,45 @@ export async function POST(req: NextRequest) {
             });
         }
 
-        // ──────────────── OUT-RESP & IN-RESP: Extract category ────────────────
+        // ──────────────── OUT-RESP & IN-RESP: AI picks best category ────────────────
         const categories = getAllCategories();
-        const categorySample = categories.slice(0, 100).join(", ");
 
-        let extractedCategory = "UNKNOWN_TOPIC";
+        let matchedCategory: string | null = null;
         try {
-            const categoryResult = await generateText({
+            const { output: selectedCategory } = await generateText({
                 model: groq(MODEL),
-                system: SYS_TOPICS(categorySample),
+                output: Output.choice({ options: categories }),
+                system: SYS_SELECT_CATEGORY,
                 messages: [{ role: "user", content: message }],
             });
-            extractedCategory = categoryResult.text.trim();
+            matchedCategory = selectedCategory;
         } catch (e) {
-            console.error("Category extraction failed:", e);
+            console.error("Category selection failed, using random:", e);
+            matchedCategory = categories[Math.floor(Math.random() * categories.length)];
         }
 
-        // Find matching category and pick random product
-        const matchedCategory = findBestMatchingCategory(extractedCategory);
-        const product = matchedCategory
-            ? getRandomProductFromCategory(matchedCategory)
-            : null;
+        // Pick a random product from the selected category
+        const product = getRandomProductFromCategory(matchedCategory);
+
+        // Generate catchy ad copy (headline + description) via AI
+        let adHeadline = "";
+        let adDescription = "";
+        if (product) {
+            try {
+                const { text: adCopyRaw } = await generateText({
+                    model: groq(MODEL),
+                    system: SYS_AD_COPY(product.name, product.desc, message),
+                    messages: [{ role: "user", content: "Generate the ad copy now." }],
+                });
+                const parsed = JSON.parse(adCopyRaw);
+                adHeadline = parsed.headline || "";
+                adDescription = parsed.description || "";
+            } catch (e) {
+                console.error("Ad copy generation failed, using defaults:", e);
+                adHeadline = product.name;
+                adDescription = product.desc;
+            }
+        }
 
         // ──────────────── OUT-RESP MODE ────────────────
         if (adMode === "out-resp") {
@@ -182,6 +206,8 @@ export async function POST(req: NextRequest) {
                             adCategory: matchedCategory || null,
                             adProductUrl: product?.url || null,
                             adProductDesc: product?.desc || null,
+                            adHeadline: adHeadline || null,
+                            adDescription: adDescription || null,
                         },
                     });
 
@@ -196,6 +222,8 @@ export async function POST(req: NextRequest) {
                                 url: product.url,
                                 desc: product.desc,
                                 category: matchedCategory,
+                                headline: adHeadline,
+                                description: adDescription,
                             },
                         });
                         const encoder = new TextEncoder();
@@ -254,6 +282,8 @@ export async function POST(req: NextRequest) {
                             adCategory: matchedCategory || null,
                             adProductUrl: product?.url || null,
                             adProductDesc: product?.desc || null,
+                            adHeadline: adHeadline || null,
+                            adDescription: adDescription || null,
                         },
                     });
 
@@ -268,6 +298,8 @@ export async function POST(req: NextRequest) {
                                 url: product.url,
                                 desc: product.desc,
                                 category: matchedCategory,
+                                headline: adHeadline,
+                                description: adDescription,
                             },
                         });
                         const encoder = new TextEncoder();
