@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { X, ExternalLink } from "lucide-react";
+import { useState, useMemo } from "react";
+import { X } from "lucide-react";
 import { useAdTracking } from "@/hooks/useAdTracking";
+import { AD_CARD_VARIANTS } from "./AdCardVariants";
 
 interface SponsoredAdCardProps {
     product: {
@@ -10,6 +11,8 @@ interface SponsoredAdCardProps {
         url: string;
         desc: string;
         category: string;
+        headline: string;
+        description: string;
     };
     messageId: string;
     sessionId: string;
@@ -30,52 +33,30 @@ export function SponsoredAdCard({
         adMode
     );
 
+    // Pick a random variant once per mount
+    const VariantComponent = useMemo(() => {
+        const index = Math.floor(Math.random() * AD_CARD_VARIANTS.length);
+        return AD_CARD_VARIANTS[index];
+    }, []);
+
     if (isDismissed) return null;
 
     return (
-        <div
-            ref={ref}
-            className="mt-3 mx-0 relative overflow-hidden rounded-xl border border-amber-500/30 bg-gradient-to-r from-[#2a2a2a] to-[#1e1e1e] p-4 shadow-lg shadow-amber-500/5 transition-all duration-300 hover:border-amber-500/50 hover:shadow-amber-500/10"
-        >
-            {/* Sponsored badge */}
-            <div className="flex items-center justify-between mb-2">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-amber-400">
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                    Sponsored
-                </span>
-                <button
-                    onClick={() => {
-                        setIsDismissed(true);
-                        onDismiss();
-                    }}
-                    className="cursor-pointer rounded-lg p-1 text-zinc-500 transition-colors hover:bg-zinc-700 hover:text-zinc-300"
-                    aria-label="Dismiss ad"
-                >
-                    <X size={14} />
-                </button>
-            </div>
+        <div ref={ref} className="mt-3 mx-0 relative">
+            {/* Dismiss button (shared across all variants) */}
+            <button
+                onClick={() => {
+                    setIsDismissed(true);
+                    onDismiss();
+                }}
+                className="absolute top-2.5 right-2.5 z-10 cursor-pointer rounded-md p-0.5 text-zinc-600 transition-colors hover:bg-zinc-700/50 hover:text-zinc-400"
+                aria-label="Dismiss ad"
+            >
+                <X size={13} />
+            </button>
 
-            {/* Product info */}
-            <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-zinc-100">{product.name}</h4>
-                <p className="text-xs leading-relaxed text-zinc-400 line-clamp-2">
-                    {product.desc}
-                </p>
-                <div className="flex items-center justify-between">
-                    <span className="text-[10px] uppercase tracking-wider text-zinc-600">
-                        {product.category}
-                    </span>
-                    <a
-                        href={product.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-amber-500/20 px-3 py-1.5 text-xs font-medium text-amber-300 transition-all hover:bg-amber-500/30 hover:text-amber-200"
-                    >
-                        Learn More
-                        <ExternalLink size={11} />
-                    </a>
-                </div>
-            </div>
+            {/* Render the randomly selected variant */}
+            <VariantComponent product={product} />
         </div>
     );
 }
