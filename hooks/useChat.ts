@@ -18,6 +18,7 @@ export interface ChatMessage {
             headline: string;
             description: string;
             situationalContext: string;
+            story: string;
         };
     } | null;
     isStreaming?: boolean;

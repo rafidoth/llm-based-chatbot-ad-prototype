@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink, ArrowUpRight, MessageCircleQuestion } from "lucide-react";
+import { ExternalLink, ArrowUpRight, MessageCircleQuestion, BookOpen } from "lucide-react";
 import { ComponentType } from "react";
 
 /**
@@ -16,6 +16,7 @@ export interface AdCardVariantProps {
         headline: string;
         description: string;
         situationalContext: string;
+        story: string;
     };
 }
 
@@ -104,44 +105,50 @@ function AdCardInline({ product }: AdCardVariantProps) {
 }
 
 // ────────────────────────────────────────────────────────────────
-// VARIANT 3: Contextual — recommendation-style clickable card
+// VARIANT 3: Story — product description as a mini-storyline
 // ────────────────────────────────────────────────────────────────
-function AdCardContextual({ product }: AdCardVariantProps) {
+function AdCardStory({ product }: AdCardVariantProps) {
     const headline = product.headline || product.name;
-    const description = product.description || product.desc;
+    const story = product.story || product.description || product.desc;
 
     return (
-        <a
-            href={product.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group block rounded-xl border border-zinc-700/40 bg-[#1e1e1e] p-4 transition-colors duration-200 hover:border-zinc-600/50 hover:bg-[#222222] cursor-pointer"
-        >
-            <div className="flex items-center gap-2 mb-2.5">
+        <div className="rounded-xl border border-zinc-700/40 bg-[#1e1e1e] p-4 transition-colors duration-200 hover:border-zinc-600/50">
+            <div className="flex items-center gap-2 mb-3">
                 <span className="text-[10px] font-medium uppercase tracking-wider text-zinc-500">
-                    Suggested
+                    Sponsored
                 </span>
                 <span className="text-zinc-700">·</span>
                 <span className="text-[10px] text-zinc-600">
                     {product.category}
                 </span>
             </div>
-            <h4 className="text-[13px] font-semibold leading-snug text-zinc-100 mb-1.5">
-                {headline}
-            </h4>
-            <p className="text-xs leading-relaxed text-zinc-400 line-clamp-2 mb-3">
-                {description}
-            </p>
-            <div className="flex items-center justify-between">
-                <span className="text-[11px] text-zinc-500">
-                    {product.name}
-                </span>
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 group-hover:text-emerald-300 transition-colors">
-                    Learn more
-                    <ExternalLink size={11} />
-                </span>
+            <div className="space-y-2">
+                <h4 className="text-[13px] font-semibold leading-snug text-zinc-100">
+                    {headline}
+                </h4>
+                {/* Story block */}
+                <div className="flex items-start gap-2.5 rounded-lg bg-zinc-800/40 px-3 py-2.5">
+                    <BookOpen size={14} className="mt-0.5 shrink-0 text-amber-400/70" />
+                    <p className="text-[12.5px] leading-relaxed text-zinc-300 italic">
+                        {story}
+                    </p>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-zinc-500">
+                        {product.name}
+                    </span>
+                    <a
+                        href={product.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex cursor-pointer items-center gap-1 text-xs font-medium text-emerald-400 transition-colors hover:text-emerald-300"
+                    >
+                        Explore
+                        <ArrowUpRight size={12} />
+                    </a>
+                </div>
             </div>
-        </a>
+        </div>
     );
 }
 
@@ -209,7 +216,7 @@ function AdCardSituational({ product }: AdCardVariantProps) {
 export const AD_CARD_VARIANTS: ComponentType<AdCardVariantProps>[] = [
     AdCardClean,
     AdCardInline,
-    AdCardContextual,
+    AdCardStory,
     AdCardSituational,
 ];
 
@@ -223,7 +230,7 @@ export const AD_CARD_VARIANT_MAP: Record<
 > = {
     clean: { component: AdCardClean, label: "Clean", description: "Card with prominent headline" },
     inline: { component: AdCardInline, label: "Inline", description: "Compact horizontal format" },
-    contextual: { component: AdCardContextual, label: "Contextual", description: "Recommendation-style clickable card" },
+    story: { component: AdCardStory, label: "Story", description: "Product description as a narrative mini-storyline" },
     situational: { component: AdCardSituational, label: "Situational", description: "Pain-point context with product solution" },
 };
 

@@ -133,8 +133,8 @@ export async function POST(req: NextRequest) {
                             adMode: "no-ad",
                         },
                     });
-                    // Update rolling summary (fire-and-forget)
-                    updateConversationSummary(conversationId, previousSummary, message, fullResponse);
+                    // Update rolling summary
+                    await updateConversationSummary(conversationId, previousSummary, message, fullResponse);
                 },
             });
 
@@ -178,6 +178,7 @@ export async function POST(req: NextRequest) {
         let adHeadline = "";
         let adDescription = "";
         let adSituationalContext = "";
+        let adStory = "";
         if (product) {
             try {
                 const { text: adCopyRaw } = await generateText({
@@ -189,11 +190,13 @@ export async function POST(req: NextRequest) {
                 adHeadline = parsed.headline || "";
                 adDescription = parsed.description || "";
                 adSituationalContext = parsed.situationalContext || "";
+                adStory = parsed.story || "";
             } catch (e) {
                 console.error("Ad copy generation failed, using defaults:", e);
                 adHeadline = product.name;
                 adDescription = product.desc;
                 adSituationalContext = "";
+                adStory = "";
             }
         }
 
@@ -229,10 +232,11 @@ export async function POST(req: NextRequest) {
                             adHeadline: adHeadline || null,
                             adDescription: adDescription || null,
                             adSituationalContext: adSituationalContext || null,
+                            adStory: adStory || null,
                         },
                     });
-                    // Update rolling summary (fire-and-forget)
-                    updateConversationSummary(conversationId, previousSummary, message, fullResponse);
+                    // Update rolling summary
+                    await updateConversationSummary(conversationId, previousSummary, message, fullResponse);
 
                     // Append ad data as a special frame
                     if (product) {
@@ -248,6 +252,7 @@ export async function POST(req: NextRequest) {
                                 headline: adHeadline,
                                 description: adDescription,
                                 situationalContext: adSituationalContext,
+                                story: adStory,
                             },
                         });
                         const encoder = new TextEncoder();
@@ -309,10 +314,11 @@ export async function POST(req: NextRequest) {
                             adHeadline: adHeadline || null,
                             adDescription: adDescription || null,
                             adSituationalContext: adSituationalContext || null,
+                            adStory: adStory || null,
                         },
                     });
-                    // Update rolling summary (fire-and-forget)
-                    updateConversationSummary(conversationId, previousSummary, message, fullResponse);
+                    // Update rolling summary
+                    await updateConversationSummary(conversationId, previousSummary, message, fullResponse);
 
                     // Send ad metadata (for tracking, not displayed as card)
                     if (product) {
@@ -328,6 +334,7 @@ export async function POST(req: NextRequest) {
                                 headline: adHeadline,
                                 description: adDescription,
                                 situationalContext: adSituationalContext,
+                                story: adStory,
                             },
                         });
                         const encoder = new TextEncoder();

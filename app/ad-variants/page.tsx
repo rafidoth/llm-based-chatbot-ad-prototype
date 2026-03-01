@@ -25,6 +25,7 @@ function buildAdProduct(product: Product): AdCardVariantProps["product"] {
         headline: `Discover ${product.name} — The smarter choice`,
         description: product.desc,
         situationalContext: `Looking for the best option in ${product.category}? Many people struggle to find reliable solutions.`,
+        story: `You were browsing endlessly for the right ${product.category.toLowerCase()} product. Then you found ${product.name} — and the search was finally over.`,
     };
 }
 

@@ -26,12 +26,13 @@ Rules:
 - The headline should be 3-8 words, catchy but not clickbait. It should feel like a helpful suggestion, not a hard sell.
 - The description should be 1-2 sentences (max 120 chars), conversational and benefit-focused. Relate it to what the user is talking about when possible.
 - The situationalContext should be a short relatable question or statement (max 100 chars) that addresses a common pain point or situation the user might face, then naturally introduces the product as a solution. Examples: "Tired of laggy mice? Try the A4Tech X7" or "Spending hours on messy code? IntelliJ has your back".
+- The story should be a short narrative (3-5 sentences, max 200 chars) that turns the product description into a mini-storyline. painting a brief before-and-after scenario where the product solves a relatable problem. Example: "You used to dread Monday meetings with a laggy mouse. Then you found the A4Tech X7 — and everything just clicked."
 - Do NOT use exclamation marks or ALL CAPS.
 - Do NOT use generic filler like "Check this out" or "You won't believe".
 - Keep the tone helpful and understated.
 
 Respond in EXACTLY this JSON format and nothing else:
-{"headline": "your headline here", "description": "your description here", "situationalContext": "your situational context here"}`;
+{"headline": "your headline here", "description": "your description here", "situationalContext": "your situational context here", "story": "your story here"}`;
 
 /** Default system prompt for no-ad mode */
 export const SYS_DEFAULT =

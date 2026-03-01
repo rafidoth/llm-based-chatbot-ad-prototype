@@ -14,6 +14,7 @@ interface SponsoredAdCardProps {
         headline: string;
         description: string;
         situationalContext: string;
+        story: string;
     };
     messageId: string;
     sessionId: string;

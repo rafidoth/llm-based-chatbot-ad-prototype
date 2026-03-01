@@ -54,6 +54,7 @@ model Message {
   adDescription        String?
   adHeadline           String?
   adSituationalContext String?
+  adStory              String?
   adEvents             AdEvent[]
   feedbacks            Feedback[]
   conversation         Conversation @relation(fields: [conversationId], references: [id])

@@ -50,7 +50,7 @@ Events are not sent immediately. They accumulate in a client-side queue and flus
 
 ## 2. Ad Display Design Variations
 
-The sponsored ad card rendered in `out-resp` mode is not a single fixed design. The system ships **three visual variants**, all defined in `components/ads/AdCardVariants.tsx`. Each variant receives identical data through the shared `AdCardVariantProps` interface — only styling and layout differ.
+The sponsored ad card rendered in `out-resp` mode is not a single fixed design. The system ships **four visual variants**, all defined in `components/ads/AdCardVariants.tsx`. Each variant receives identical data through the shared `AdCardVariantProps` interface — only styling and layout differ.
 
 ### Variant Registry
 
@@ -58,7 +58,8 @@ The sponsored ad card rendered in `out-resp` mode is not a single fixed design. 
 |---|---|---|---|---|
 | 1 | **Clean** | Full card layout with headline prominently displayed, padded borders, spacious | `Sponsored · {category}` | "Learn more →" link |
 | 2 | **Inline** | Compact, horizontally laid out, minimal padding | `Sponsored · {product}` | "Visit →" link |
-| 3 | **Contextual** | Recommendation-style, the **entire card is a clickable `<a>` link**, subtle hover background shift | `Suggested · {category}` | "Learn more" with external-link icon |
+| 3 | **Story** | Product description presented as a short narrative mini-storyline (2nd person, before-and-after), displayed in an italicized block with a book icon | `Sponsored · {category}` | "Explore →" link |
+| 4 | **Situational** | Pain-point context with a relatable question/statement, then product as solution | `Sponsored · {category}` | "Try it out →" link |
 
 ### Variant Selection
 
@@ -77,7 +78,7 @@ const VariantComponent = useMemo(() => {
 
 ### Ad Copy Generation
 
-Each ad card displays an **AI-generated headline and description** rather than raw product data. The `/api/chat` route makes a separate `generateText` LLM call using the `SYS_AD_COPY` prompt, which produces a catchy, context-aware headline (3–8 words) and a short benefit-focused description (≤ 120 chars) based on the user's message and the selected product.
+Each ad card displays an **AI-generated headline, description, situational context, and story** rather than raw product data. The `/api/chat` route makes a separate `generateText` LLM call using the `SYS_AD_COPY` prompt, which produces a catchy, context-aware headline (3–8 words), a short benefit-focused description (≤ 120 chars), a relatable situational context line (≤ 100 chars), and a narrative mini-storyline (≤ 200 chars) based on the user's message and the selected product.
 
 ---
 

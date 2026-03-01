@@ -44,6 +44,7 @@ export async function GET(
                 adHeadline: true,
                 adDescription: true,
                 adSituationalContext: true,
+                adStory: true,
                 createdAt: true,
             },
         });
@@ -67,6 +68,7 @@ export async function GET(
                             headline: msg.adHeadline || "",
                             description: msg.adDescription || "",
                             situationalContext: msg.adSituationalContext || "",
+                            story: msg.adStory || "",
                         },
                     }
                     : null,
