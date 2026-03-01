@@ -194,6 +194,7 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
                     onLogout={handleLogout}
                     userName={user.name}
                     userEmail={user.email}
+                    onAdCardVariantsChange={setAdCardVariants}
                 />
             </div>
 

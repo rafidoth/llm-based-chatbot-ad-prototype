@@ -16,6 +16,7 @@ interface UserProfileModalProps {
     onClose: () => void;
     userName: string;
     userEmail: string;
+    onAdCardVariantsChange?: (variants: string[]) => void;
 }
 
 const AD_TURN_OPTIONS = [
@@ -46,6 +47,7 @@ export function UserProfileModal({
     onClose,
     userName,
     userEmail,
+    onAdCardVariantsChange,
 }: UserProfileModalProps) {
     const [adTurnMode, setAdTurnMode] = useState("randomized");
     const [selectedVariants, setSelectedVariants] = useState<string[]>([...AD_CARD_VARIANT_KEYS]);
@@ -119,6 +121,7 @@ export function UserProfileModal({
             if (res.ok) {
                 setSaved(true);
                 setTimeout(() => setSaved(false), 2000);
+                onAdCardVariantsChange?.(updated);
             }
         } catch (e) {
             console.error("Failed to save variant preference:", e);
@@ -178,15 +181,15 @@ export function UserProfileModal({
                                     onClick={() => handleSaveTurnMode(option.value)}
                                     disabled={isSaving}
                                     className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-200 ${adTurnMode === option.value
-                                            ? "bg-violet-500/15 border border-violet-500/40 shadow-sm shadow-violet-500/5"
-                                            : "border border-zinc-700/30 hover:bg-zinc-800/50 hover:border-zinc-600/40"
+                                        ? "bg-violet-500/15 border border-violet-500/40 shadow-sm shadow-violet-500/5"
+                                        : "border border-zinc-700/30 hover:bg-zinc-800/50 hover:border-zinc-600/40"
                                         }`}
                                 >
                                     {/* Radio indicator */}
                                     <div
                                         className={`flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${adTurnMode === option.value
-                                                ? "border-violet-400 bg-violet-400"
-                                                : "border-zinc-600"
+                                            ? "border-violet-400 bg-violet-400"
+                                            : "border-zinc-600"
                                             }`}
                                     >
                                         {adTurnMode === option.value && (
@@ -197,8 +200,8 @@ export function UserProfileModal({
                                     <div className="min-w-0">
                                         <p
                                             className={`text-xs font-medium ${adTurnMode === option.value
-                                                    ? "text-violet-200"
-                                                    : "text-zinc-300"
+                                                ? "text-violet-200"
+                                                : "text-zinc-300"
                                                 }`}
                                         >
                                             {option.label}
@@ -231,8 +234,8 @@ export function UserProfileModal({
                                             onClick={() => handleToggleVariant(key)}
                                             disabled={isSaving || isLastSelected}
                                             className={`flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-all duration-200 ${isSelected
-                                                    ? "bg-emerald-500/10 border border-emerald-500/30"
-                                                    : "border border-zinc-700/30 hover:bg-zinc-800/50 hover:border-zinc-600/40"
+                                                ? "bg-emerald-500/10 border border-emerald-500/30"
+                                                : "border border-zinc-700/30 hover:bg-zinc-800/50 hover:border-zinc-600/40"
                                                 } ${isLastSelected ? "opacity-60 cursor-not-allowed" : ""}`}
                                         >
                                             {/* Checkbox indicator */}
@@ -245,8 +248,8 @@ export function UserProfileModal({
                                             <div className="min-w-0">
                                                 <p
                                                     className={`text-xs font-medium ${isSelected
-                                                            ? "text-emerald-200"
-                                                            : "text-zinc-300"
+                                                        ? "text-emerald-200"
+                                                        : "text-zinc-300"
                                                         }`}
                                                 >
                                                     {variant.label}
