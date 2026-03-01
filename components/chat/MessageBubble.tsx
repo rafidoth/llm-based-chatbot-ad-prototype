@@ -166,7 +166,7 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
 
                         <div
                             ref={isInResp ? inRespRef : undefined}
-                            className={`${isUser ? "bg-green-800 text-white rounded-2xl p-3 w-fit ml-auto" : ""} max-w-none text-sm text-zinc-200`}
+                            className={`${isUser ? "bg-stone-900 text-white rounded-2xl p-3 w-fit ml-auto" : ""} max-w-none text-sm text-zinc-200`}
                         >
                             {message.isStreaming ? (
                                 <p className="whitespace-pre-wrap text-zinc-500 leading-7">

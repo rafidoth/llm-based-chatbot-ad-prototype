@@ -7,9 +7,10 @@ interface ChatInputProps {
     onSend: (message: string) => void;
     onStop: () => void;
     isLoading: boolean;
+    className?: string;
 }
 
-export function ChatInput({ onSend, onStop, isLoading }: ChatInputProps) {
+export function ChatInput({ onSend, onStop, isLoading, className }: ChatInputProps) {
     const [input, setInput] = useState("");
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -45,23 +46,23 @@ export function ChatInput({ onSend, onStop, isLoading }: ChatInputProps) {
     };
 
     return (
-        <div className="border-t border-zinc-800/50 bg-[#212121] px-4 pb-4 pt-3">
+        <div className={className ?? "border-t border-zinc-800/50 bg-[#212121] px-4 pb-4 pt-3"}>
             <div className="mx-auto max-w-3xl">
-                <div className="relative flex items-end gap-2 rounded-2xl border border-zinc-700/50 bg-[#2f2f2f] p-2 shadow-lg transition-colors focus-within:border-zinc-600">
+                <div className="relative flex items-end gap-2 rounded-full border bg-natural-900 p-3 shadow-lg transition-colors focus-within:border-white/30">
                     <textarea
                         ref={textareaRef}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="Message..."
+                        placeholder="Ask Anything"
                         rows={1}
-                        className="max-h-[200px] min-h-[24px] flex-1 resize-none bg-transparent px-2 py-1 text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
+                        className="max-h-[200px] min-h-[24px] flex-1 resize-none bg-transparent px-2 py-1 text-sm text-zinc-100 outline-none placeholder:text-white/50"
                     />
 
                     {isLoading ? (
                         <button
                             onClick={onStop}
-                            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-zinc-600 text-zinc-200 transition-colors hover:bg-zinc-500"
+                            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-zinc-600 text-zinc-200 transition-colors hover:bg-zinc-500"
                             aria-label="Stop generating"
                         >
                             <Square size={14} fill="currentColor" />
@@ -70,7 +71,7 @@ export function ChatInput({ onSend, onStop, isLoading }: ChatInputProps) {
                         <button
                             onClick={handleSubmit}
                             disabled={!input.trim()}
-                            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg bg-zinc-100 text-zinc-900 transition-all hover:bg-white disabled:bg-zinc-700 disabled:text-zinc-500 disabled:cursor-default"
+                            className="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full bg-zinc-100 text-zinc-900 transition-all hover:bg-white disabled:bg-zinc-700 disabled:text-zinc-500 disabled:cursor-default"
                             aria-label="Send message"
                         >
                             <ArrowUp size={16} strokeWidth={2.5} />

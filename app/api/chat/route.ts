@@ -9,8 +9,10 @@ import {
     getRandomProductFromCategory,
 } from "@/lib/products";
 import { SYS_SELECT_CATEGORY, SYS_INTEREST_DESC, SYS_DEFAULT, SYS_AD_COPY } from "@/lib/prompts";
+import { updateConversationSummary } from "@/lib/summarize";
 
 const MODEL = "openai/gpt-oss-120b";
+// const MODEL = "qwen/qwen3-32b";
 
 export async function POST(req: NextRequest) {
     try {
@@ -44,6 +46,8 @@ export async function POST(req: NextRequest) {
             },
         });
 
+        const previousSummary = conversation?.summary || null;
+
         if (!conversation) {
             return new Response(
                 JSON.stringify({ error: "Conversation not found" }),
@@ -75,11 +79,22 @@ export async function POST(req: NextRequest) {
         });
 
         // Build conversation history for the LLM
-        const history = conversation.messages.map((m: { role: string; content: string }) => ({
-            role: m.role as "user" | "assistant",
-            content: m.content,
-        }));
-        history.push({ role: "user", content: message });
+        // If a summary exists, use it as context + only the latest message
+        // Otherwise, send the full (short) history for the first few turns
+        let history: { role: "user" | "assistant" | "system"; content: string }[];
+
+        if (previousSummary) {
+            history = [
+                { role: "system", content: `Previous conversation summary:\n${previousSummary}` },
+                { role: "user", content: message },
+            ];
+        } else {
+            history = conversation.messages.map((m: { role: string; content: string }) => ({
+                role: m.role as "user" | "assistant",
+                content: m.content,
+            }));
+            history.push({ role: "user", content: message });
+        }
 
         // Update conversation title if first message
         if (conversation.messages.length === 0) {
@@ -118,6 +133,8 @@ export async function POST(req: NextRequest) {
                             adMode: "no-ad",
                         },
                     });
+                    // Update rolling summary (fire-and-forget)
+                    updateConversationSummary(conversationId, previousSummary, message, fullResponse);
                 },
             });
 
@@ -157,9 +174,10 @@ export async function POST(req: NextRequest) {
         // Pick a random product from the selected category
         const product = getRandomProductFromCategory(matchedCategory);
 
-        // Generate catchy ad copy (headline + description) via AI
+        // Generate catchy ad copy (headline + description + situationalContext) via AI
         let adHeadline = "";
         let adDescription = "";
+        let adSituationalContext = "";
         if (product) {
             try {
                 const { text: adCopyRaw } = await generateText({
@@ -170,10 +188,12 @@ export async function POST(req: NextRequest) {
                 const parsed = JSON.parse(adCopyRaw);
                 adHeadline = parsed.headline || "";
                 adDescription = parsed.description || "";
+                adSituationalContext = parsed.situationalContext || "";
             } catch (e) {
                 console.error("Ad copy generation failed, using defaults:", e);
                 adHeadline = product.name;
                 adDescription = product.desc;
+                adSituationalContext = "";
             }
         }
 
@@ -208,8 +228,11 @@ export async function POST(req: NextRequest) {
                             adProductDesc: product?.desc || null,
                             adHeadline: adHeadline || null,
                             adDescription: adDescription || null,
+                            adSituationalContext: adSituationalContext || null,
                         },
                     });
+                    // Update rolling summary (fire-and-forget)
+                    updateConversationSummary(conversationId, previousSummary, message, fullResponse);
 
                     // Append ad data as a special frame
                     if (product) {
@@ -224,6 +247,7 @@ export async function POST(req: NextRequest) {
                                 category: matchedCategory,
                                 headline: adHeadline,
                                 description: adDescription,
+                                situationalContext: adSituationalContext,
                             },
                         });
                         const encoder = new TextEncoder();
@@ -284,8 +308,11 @@ export async function POST(req: NextRequest) {
                             adProductDesc: product?.desc || null,
                             adHeadline: adHeadline || null,
                             adDescription: adDescription || null,
+                            adSituationalContext: adSituationalContext || null,
                         },
                     });
+                    // Update rolling summary (fire-and-forget)
+                    updateConversationSummary(conversationId, previousSummary, message, fullResponse);
 
                     // Send ad metadata (for tracking, not displayed as card)
                     if (product) {
@@ -300,6 +327,7 @@ export async function POST(req: NextRequest) {
                                 category: matchedCategory,
                                 headline: adHeadline,
                                 description: adDescription,
+                                situationalContext: adSituationalContext,
                             },
                         });
                         const encoder = new TextEncoder();

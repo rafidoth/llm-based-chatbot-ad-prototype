@@ -43,6 +43,7 @@ export async function GET(
                 adProductDesc: true,
                 adHeadline: true,
                 adDescription: true,
+                adSituationalContext: true,
                 createdAt: true,
             },
         });
@@ -65,6 +66,7 @@ export async function GET(
                             category: msg.adCategory || "",
                             headline: msg.adHeadline || "",
                             description: msg.adDescription || "",
+                            situationalContext: msg.adSituationalContext || "",
                         },
                     }
                     : null,

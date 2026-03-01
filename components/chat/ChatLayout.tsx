@@ -31,6 +31,7 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [isLoadingConversation, setIsLoadingConversation] = useState(false);
+    const [adCardVariants, setAdCardVariants] = useState<string[]>([]);
 
     const {
         messages,
@@ -73,6 +74,25 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
     useEffect(() => {
         fetchConversations();
     }, [fetchConversations]);
+
+    // Fetch user's ad card variant preference
+    useEffect(() => {
+        fetch("/api/user/preferences")
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (data?.user?.adCardVariants) {
+                    try {
+                        const parsed = JSON.parse(data.user.adCardVariants);
+                        if (Array.isArray(parsed) && parsed.length > 0) {
+                            setAdCardVariants(parsed);
+                        }
+                    } catch {
+                        // ignore parse errors
+                    }
+                }
+            })
+            .catch(console.error);
+    }, []);
 
     // Load messages when conversation ID is provided (from URL)
     useEffect(() => {
@@ -204,15 +224,32 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
                     </div>
                 </header>
 
-                {/* Messages */}
-                <MessageList messages={messages} sessionId={sessionId} isLoadingConversation={isLoadingConversation} />
-
-                {/* Input */}
-                <ChatInput
-                    onSend={handleSendMessage}
-                    onStop={stopGeneration}
-                    isLoading={isLoading}
-                />
+                {messages.length === 0 && !isLoadingConversation ? (
+                    /* Empty state: center the heading and input together */
+                    <div className="flex flex-1 flex-col items-center justify-center px-4">
+                        <div className="w-full max-w-3xl">
+                            <h2 className="mb-6 text-center text-2xl text-zinc-200">
+                                What&apos;s on your mind today?
+                            </h2>
+                            <ChatInput
+                                onSend={handleSendMessage}
+                                onStop={stopGeneration}
+                                isLoading={isLoading}
+                                className="px-4 pb-4 pt-3"
+                            />
+                        </div>
+                    </div>
+                ) : (
+                    /* Chat state: messages list with input pinned at bottom */
+                    <>
+                        <MessageList messages={messages} sessionId={sessionId} isLoadingConversation={isLoadingConversation} adCardVariants={adCardVariants} />
+                        <ChatInput
+                            onSend={handleSendMessage}
+                            onStop={stopGeneration}
+                            isLoading={isLoading}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );
