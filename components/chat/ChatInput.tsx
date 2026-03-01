@@ -12,14 +12,20 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, onStop, isLoading, className }: ChatInputProps) {
     const [input, setInput] = useState("");
+    const [isMultiLine, setIsMultiLine] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-    // Auto-resize textarea
+    // Auto-resize textarea and detect multiline
     useEffect(() => {
         const textarea = textareaRef.current;
         if (textarea) {
             textarea.style.height = "auto";
-            textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+            const scrollHeight = textarea.scrollHeight;
+            const maxHeight = 240;
+            const clampedHeight = Math.min(scrollHeight, maxHeight);
+            textarea.style.height = `${clampedHeight}px`;
+            // Switch to rounded corners when content wraps past a single line
+            setIsMultiLine(scrollHeight > 44);
         }
     }, [input]);
 
@@ -36,6 +42,7 @@ export function ChatInput({ onSend, onStop, isLoading, className }: ChatInputPro
         if (textareaRef.current) {
             textareaRef.current.style.height = "auto";
         }
+        setIsMultiLine(false);
     };
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -48,7 +55,10 @@ export function ChatInput({ onSend, onStop, isLoading, className }: ChatInputPro
     return (
         <div className={className ?? "border-t border-zinc-800/50 bg-[#212121] px-4 pb-4 pt-3"}>
             <div className="mx-auto max-w-3xl">
-                <div className="relative flex items-end gap-2 rounded-full border bg-natural-900 p-3 shadow-lg transition-colors focus-within:border-white/30">
+                <div
+                    className={`relative flex items-end gap-2 border bg-natural-900 p-3 shadow-lg transition-all duration-200 focus-within:border-white/30 ${isMultiLine ? "rounded-2xl" : "rounded-full"
+                        }`}
+                >
                     <textarea
                         ref={textareaRef}
                         value={input}
@@ -56,7 +66,7 @@ export function ChatInput({ onSend, onStop, isLoading, className }: ChatInputPro
                         onKeyDown={handleKeyDown}
                         placeholder="Ask Anything"
                         rows={1}
-                        className="max-h-[200px] min-h-[24px] flex-1 resize-none bg-transparent px-2 py-1 text-sm text-zinc-100 outline-none placeholder:text-white/50"
+                        className="max-h-[240px] min-h-[24px] flex-1 resize-none overflow-y-auto bg-transparent px-2 py-1 text-sm text-zinc-100 outline-none placeholder:text-white/50"
                     />
 
                     {isLoading ? (
