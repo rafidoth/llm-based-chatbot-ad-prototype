@@ -1,10 +1,12 @@
 "use client";
 
+import { memo } from "react";
+
 interface StreamingBubbleProps {
     content: string;
 }
 
-export function StreamingBubble({ content }: StreamingBubbleProps) {
+function StreamingBubbleComponent({ content }: StreamingBubbleProps) {
     return (
         <div className="group py-5">
             <div className="mx-auto max-w-3xl px-4">
@@ -21,3 +23,8 @@ export function StreamingBubble({ content }: StreamingBubbleProps) {
         </div>
     );
 }
+
+export const StreamingBubble = memo(
+    StreamingBubbleComponent,
+    (prev, next) => prev.content === next.content
+);

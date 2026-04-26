@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { memo, useState, useCallback } from "react";
 import { FeedbackModal } from "./FeedbackModal";
 
 interface MessageActionsProps {
@@ -10,7 +10,7 @@ interface MessageActionsProps {
     adMode: string;
 }
 
-export function MessageActions({ messageId, messageContent, sessionId, adMode }: MessageActionsProps) {
+function MessageActionsComponent({ messageId, messageContent, sessionId, adMode }: MessageActionsProps) {
     const [voteState, setVoteState] = useState<"none" | "up" | "down">("none");
     const [copied, setCopied] = useState(false);
     const [feedbackOpen, setFeedbackOpen] = useState(false);
@@ -143,3 +143,12 @@ export function MessageActions({ messageId, messageContent, sessionId, adMode }:
         </>
     );
 }
+
+export const MessageActions = memo(
+    MessageActionsComponent,
+    (prev, next) =>
+        prev.messageId === next.messageId &&
+        prev.messageContent === next.messageContent &&
+        prev.sessionId === next.sessionId &&
+        prev.adMode === next.adMode
+);

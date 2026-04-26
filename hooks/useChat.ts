@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 
 export interface ChatMessage {
     id: string;
@@ -26,8 +26,42 @@ export interface ChatMessage {
 
 export function useChat(conversationId: string | null) {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
+    const [streamingMessage, setStreamingMessage] = useState<ChatMessage | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
+    const streamDraftRef = useRef<ChatMessage | null>(null);
+    const animationFrameRef = useRef<number | null>(null);
+
+    const flushStreamingDraft = useCallback(() => {
+        if (streamDraftRef.current) {
+            setStreamingMessage(streamDraftRef.current);
+        }
+        animationFrameRef.current = null;
+    }, []);
+
+    const scheduleStreamingFlush = useCallback(() => {
+        if (animationFrameRef.current !== null) return;
+        animationFrameRef.current = requestAnimationFrame(flushStreamingDraft);
+    }, [flushStreamingDraft]);
+
+    const cancelScheduledFlush = useCallback(() => {
+        if (animationFrameRef.current !== null) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+        }
+    }, []);
+
+    const finalizeStreamingMessage = useCallback((message: ChatMessage | null) => {
+        cancelScheduledFlush();
+        streamDraftRef.current = null;
+        if (!message) {
+            setStreamingMessage(null);
+            return;
+        }
+
+        setMessages((prev) => [...prev, { ...message, isStreaming: false }]);
+        setStreamingMessage(null);
+    }, [cancelScheduledFlush]);
 
     const sendMessage = useCallback(
         async (content: string, overrideConversationId?: string) => {
@@ -47,7 +81,8 @@ export function useChat(conversationId: string | null) {
                 isStreaming: true,
             };
 
-            setMessages((prev) => [...prev, userMessage, assistantMessage]);
+            setMessages((prev) => [...prev, userMessage]);
+            setStreamingMessage(assistantMessage);
             setIsLoading(true);
 
             const controller = new AbortController();
@@ -118,81 +153,80 @@ export function useChat(conversationId: string | null) {
                     // Clean the Vercel AI SDK data stream protocol artifacts
                     const cleanedText = cleanStreamText(accumulatedText);
 
-                    setMessages((prev) =>
-                        prev.map((msg) =>
-                            msg.id === assistantMessage.id
-                                ? {
-                                    ...msg,
-                                    content: cleanedText,
-                                    adMode,
-                                    adData,
-                                    isStreaming: true,
-                                }
-                                : msg
-                        )
-                    );
+                    streamDraftRef.current = {
+                        ...assistantMessage,
+                        content: cleanedText,
+                        adMode,
+                        adData,
+                        isStreaming: true,
+                    };
+                    scheduleStreamingFlush();
                 }
 
                 // Final cleanup
                 const finalText = cleanStreamText(accumulatedText);
-
-                setMessages((prev) =>
-                    prev.map((msg) =>
-                        msg.id === assistantMessage.id
-                            ? {
-                                ...msg,
-                                content: finalText,
-                                adMode,
-                                adData,
-                                isStreaming: false,
-                            }
-                            : msg
-                    )
-                );
+                finalizeStreamingMessage({
+                    ...assistantMessage,
+                    content: finalText,
+                    adMode,
+                    adData,
+                    isStreaming: false,
+                });
             } catch (error) {
-                if ((error as Error).name === "AbortError") return;
+                if ((error as Error).name === "AbortError") {
+                    finalizeStreamingMessage(streamDraftRef.current);
+                    return;
+                }
                 console.error("Chat error:", error);
 
-                setMessages((prev) =>
-                    prev.map((msg) =>
-                        msg.id === assistantMessage.id
-                            ? {
-                                ...msg,
-                                content: "Sorry, something went wrong. Please try again.",
-                                isStreaming: false,
-                            }
-                            : msg
-                    )
-                );
+                finalizeStreamingMessage({
+                    ...assistantMessage,
+                    content: "Sorry, something went wrong. Please try again.",
+                    isStreaming: false,
+                });
             } finally {
                 setIsLoading(false);
                 abortControllerRef.current = null;
             }
         },
-        [conversationId, isLoading]
+        [conversationId, isLoading, finalizeStreamingMessage, scheduleStreamingFlush]
     );
 
     const stopGeneration = useCallback(() => {
         abortControllerRef.current?.abort();
         setIsLoading(false);
-        setMessages((prev) =>
-            prev.map((msg) =>
-                msg.isStreaming ? { ...msg, isStreaming: false } : msg
-            )
-        );
-    }, []);
+        finalizeStreamingMessage(streamDraftRef.current ?? streamingMessage);
+    }, [finalizeStreamingMessage, streamingMessage]);
 
     const clearMessages = useCallback(() => {
         setMessages([]);
-    }, []);
+        setStreamingMessage(null);
+        streamDraftRef.current = null;
+        cancelScheduledFlush();
+    }, [cancelScheduledFlush]);
+
+    const replaceMessages = useCallback((nextMessages: ChatMessage[]) => {
+        setMessages(nextMessages);
+        setStreamingMessage(null);
+        streamDraftRef.current = null;
+        cancelScheduledFlush();
+    }, [cancelScheduledFlush]);
+
+    useEffect(() => {
+        return () => {
+            abortControllerRef.current?.abort();
+            cancelScheduledFlush();
+        };
+    }, [cancelScheduledFlush]);
 
     return {
         messages,
+        streamingMessage,
         isLoading,
         sendMessage,
         stopGeneration,
         clearMessages,
-        setMessages,
+        setMessages: replaceMessages,
     };
 }
 

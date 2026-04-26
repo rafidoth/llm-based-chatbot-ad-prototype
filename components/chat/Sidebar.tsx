@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { MessageSquarePlus, LogOut } from "lucide-react";
 import { UserProfileModal } from "./UserProfileModal";
 
@@ -20,7 +20,7 @@ interface SidebarProps {
     userEmail: string;
 }
 
-export function Sidebar({
+function SidebarComponent({
     conversations,
     activeConversationId,
     onSelectConversation,
@@ -98,3 +98,15 @@ export function Sidebar({
         </>
     );
 }
+
+export const Sidebar = memo(
+    SidebarComponent,
+    (prev, next) =>
+        prev.conversations === next.conversations &&
+        prev.activeConversationId === next.activeConversationId &&
+        prev.onSelectConversation === next.onSelectConversation &&
+        prev.onNewChat === next.onNewChat &&
+        prev.onLogout === next.onLogout &&
+        prev.userName === next.userName &&
+        prev.userEmail === next.userEmail
+);

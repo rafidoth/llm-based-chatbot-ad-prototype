@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { memo, useState, useRef, useEffect } from "react";
 import { ArrowUp, Square } from "lucide-react";
 
 interface ChatInputProps {
@@ -10,7 +10,7 @@ interface ChatInputProps {
     className?: string;
 }
 
-export function ChatInput({ onSend, onStop, isLoading, className }: ChatInputProps) {
+function ChatInputComponent({ onSend, onStop, isLoading, className }: ChatInputProps) {
     const [input, setInput] = useState("");
     const [isMultiLine, setIsMultiLine] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -96,3 +96,12 @@ export function ChatInput({ onSend, onStop, isLoading, className }: ChatInputPro
         </div>
     );
 }
+
+export const ChatInput = memo(
+    ChatInputComponent,
+    (prev, next) =>
+        prev.isLoading === next.isLoading &&
+        prev.className === next.className &&
+        prev.onSend === next.onSend &&
+        prev.onStop === next.onStop
+);

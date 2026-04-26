@@ -1,11 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
-import { MessageList } from "./MessageList";
-import { ChatInput } from "./ChatInput";
-import { useChat } from "@/hooks/useChat";
+import { ChatPane } from "./ChatPane";
 import { Menu, X } from "lucide-react";
 
 interface Conversation {
@@ -23,39 +21,23 @@ interface User {
 interface ChatLayoutProps {
     user: User;
     sessionId: string;
-    conversationId: string | null;
+    initialConversations: Conversation[];
 }
 
-export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps) {
+export function ChatLayout({ user, sessionId, initialConversations }: ChatLayoutProps) {
     const router = useRouter();
-    const [conversations, setConversations] = useState<Conversation[]>([]);
+    const pathname = usePathname();
+    const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
     const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [isLoadingConversation, setIsLoadingConversation] = useState(false);
 
-    const {
-        messages,
-        isLoading,
-        sendMessage,
-        stopGeneration,
-        clearMessages,
-        setMessages,
-    } = useChat(conversationId);
-
-    // When streaming ends (isLoading: true → false), refetch messages from DB
-    const prevIsLoadingRef = useRef(false);
-    useEffect(() => {
-        if (prevIsLoadingRef.current && !isLoading && conversationId) {
-            fetch(`/api/conversations/${conversationId}/messages`)
-                .then((res) => res.ok ? res.json() : null)
-                .then((data) => {
-                    if (data?.messages) {
-                        setMessages(data.messages);
-                    }
-                })
-                .catch((e) => console.error("Failed to refresh messages:", e));
+    const activeConversationId = useMemo(() => {
+        const segments = pathname.split("/").filter(Boolean);
+        if (segments.length === 2 && segments[0] === "chat") {
+            return decodeURIComponent(segments[1]);
         }
-        prevIsLoadingRef.current = isLoading;
-    }, [isLoading, conversationId, setMessages]);
+
+        return null;
+    }, [pathname]);
 
     // Fetch conversations list for sidebar
     const fetchConversations = useCallback(async () => {
@@ -71,26 +53,28 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
     }, []);
 
     useEffect(() => {
-        fetchConversations();
-    }, [fetchConversations]);
+        let cancelled = false;
 
-    // Load messages when conversation ID is provided (from URL)
-    useEffect(() => {
-        if (!conversationId) return;
+        const loadConversations = async () => {
+            try {
+                const res = await fetch("/api/conversations");
+                if (!res.ok || cancelled) return;
 
-        setIsLoadingConversation(true);
-        clearMessages();
-
-        fetch(`/api/conversations/${conversationId}/messages`)
-            .then((res) => res.ok ? res.json() : null)
-            .then((data) => {
-                if (data?.messages) {
-                    setMessages(data.messages);
+                const data = await res.json();
+                if (!cancelled) {
+                    setConversations(data.conversations);
                 }
-            })
-            .catch((e) => console.error("Failed to load messages:", e))
-            .finally(() => setIsLoadingConversation(false));
-    }, [conversationId, clearMessages, setMessages]);
+            } catch (e) {
+                console.error("Failed to fetch conversations:", e);
+            }
+        };
+
+        void loadConversations();
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     const handleNewChat = useCallback(() => {
         router.push("/chat");
@@ -101,43 +85,6 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
             router.push(`/chat/${id}`);
         },
         [router]
-    );
-
-    const handleSendMessage = useCallback(
-        async (content: string) => {
-            if (!conversationId) {
-                // Create a new conversation, then navigate to it
-                try {
-                    const res = await fetch("/api/conversations", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ title: content.slice(0, 80) }),
-                    });
-
-                    if (res.ok) {
-                        const data = await res.json();
-                        const newId = data.conversation.id;
-
-                        // Send the message with the new conversation ID
-                        await sendMessage(content, newId);
-
-                        // Navigate to the new conversation page
-                        router.push(`/chat/${newId}`);
-
-                        // Refresh sidebar
-                        fetchConversations();
-                        return;
-                    }
-                } catch (e) {
-                    console.error("Failed to create conversation:", e);
-                    return;
-                }
-            }
-
-            await sendMessage(content);
-            fetchConversations();
-        },
-        [conversationId, sendMessage, fetchConversations, router]
     );
 
     const handleLogout = useCallback(async () => {
@@ -168,7 +115,7 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
             >
                 <Sidebar
                     conversations={conversations}
-                    activeConversationId={conversationId}
+                    activeConversationId={activeConversationId}
                     onSelectConversation={handleSelectConversation}
                     onNewChat={handleNewChat}
                     onLogout={handleLogout}
@@ -204,32 +151,11 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
                     </div>
                 </header>
 
-                {messages.length === 0 && !isLoadingConversation ? (
-                    /* Empty state: center the heading and input together */
-                    <div className="flex flex-1 flex-col items-center justify-center px-4">
-                        <div className="w-full max-w-3xl">
-                            <h2 className="mb-6 text-center text-2xl text-zinc-200">
-                                What&apos;s on your mind today?
-                            </h2>
-                            <ChatInput
-                                onSend={handleSendMessage}
-                                onStop={stopGeneration}
-                                isLoading={isLoading}
-                                className="px-4 pb-4 pt-3"
-                            />
-                        </div>
-                    </div>
-                ) : (
-                    /* Chat state: messages list with input pinned at bottom */
-                    <>
-                        <MessageList messages={messages} sessionId={sessionId} isLoadingConversation={isLoadingConversation} />
-                        <ChatInput
-                            onSend={handleSendMessage}
-                            onStop={stopGeneration}
-                            isLoading={isLoading}
-                        />
-                    </>
-                )}
+                <ChatPane
+                    conversationId={activeConversationId}
+                    sessionId={sessionId}
+                    onConversationListChanged={fetchConversations}
+                />
             </div>
         </div>
     );

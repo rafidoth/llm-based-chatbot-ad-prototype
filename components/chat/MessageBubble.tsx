@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { memo } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/hooks/useChat";
@@ -131,21 +131,9 @@ export interface MessageBubbleProps {
     sessionId: string;
 }
 
-export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
+function MessageBubbleComponent({ message, sessionId }: MessageBubbleProps) {
     const isUser = message.role === "user";
     const isInResp = message.adMode === "in-resp" && message.adData;
-
-    // Local snapshot of content — only updates when streaming ends
-    const [finalContent, setFinalContent] = useState<string | null>(null);
-    const wasStreaming = useRef(message.isStreaming);
-
-    useEffect(() => {
-        // Capture content the moment streaming stops
-        if (wasStreaming.current && !message.isStreaming) {
-            setFinalContent(message.content);
-        }
-        wasStreaming.current = message.isStreaming;
-    }, [message.isStreaming, message.content]);
 
     // For IN-RESP mode, track the entire message bubble
     const { ref: inRespRef } = useAdTracking(
@@ -155,7 +143,7 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
         "in-resp"
     );
 
-    const contentToRender = finalContent ?? message.content ?? "...";
+    const contentToRender = message.content ?? "...";
 
     return (
         <div className="group py-5">
@@ -174,7 +162,6 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
                                 </p>
                             ) : (
                                 <ReactMarkdown
-                                    key={finalContent}
                                     remarkPlugins={REMARK_PLUGINS}
                                     components={markdownComponents}
                                 >
@@ -213,3 +200,15 @@ export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
         </div>
     );
 }
+
+export const MessageBubble = memo(
+    MessageBubbleComponent,
+    (prev, next) =>
+        prev.sessionId === next.sessionId &&
+        prev.message.id === next.message.id &&
+        prev.message.role === next.message.role &&
+        prev.message.content === next.message.content &&
+        prev.message.adMode === next.message.adMode &&
+        prev.message.isStreaming === next.message.isStreaming &&
+        prev.message.adData === next.message.adData
+);
