@@ -5,16 +5,22 @@
  * Supports multiple scheduling strategies selectable per user.
  */
 
-export type AdMode = "no-ad" | "out-resp" | "in-resp";
-export type AdTurnMode = "randomized" | "ordered" | "only-in-resp" | "only-out-resp";
+export type AdMode = "no-ad" | "out-resp-normal" | "out-resp-inline" | "in-resp";
+export type AdTurnMode =
+    | "randomized"
+    | "ordered"
+    | "only-in-resp"
+    | "only-out-resp-normal"
+    | "only-out-resp-inline"
+    | "only-out-resp";
 
 // Default schedule for ordered mode: cycles through modes
 export const AD_MODE_SCHEDULE: AdMode[] = [
-    "out-resp",
+    "out-resp-normal",
     "no-ad",
     "in-resp",
-    "out-resp",
-    "out-resp",
+    "out-resp-inline",
+    "out-resp-normal",
 ];
 
 // Override: set a single mode for ALL turns (for testing)
@@ -34,8 +40,11 @@ export function getAdModeForTurn(turnIndex: number, adTurnMode: AdTurnMode = "ra
         }
         case "only-in-resp":
             return "in-resp";
+        case "only-out-resp-normal":
         case "only-out-resp":
-            return "out-resp";
+            return "out-resp-normal";
+        case "only-out-resp-inline":
+            return "out-resp-inline";
         default:
             return AD_MODE_SCHEDULE[turnIndex % AD_MODE_SCHEDULE.length];
     }

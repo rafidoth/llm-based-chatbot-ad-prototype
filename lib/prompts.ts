@@ -1,5 +1,5 @@
 /**
- * System prompts for the 3 ad modes.
+ * System prompts used by ad/non-ad response flows.
  */
 
 /** Used to select the most relevant ad category for the user's query */
@@ -36,7 +36,7 @@ Respond in EXACTLY this JSON format and nothing else:
 
 /** Default system prompt for no-ad mode */
 export const SYS_DEFAULT =
-    "You are a helpful AI assistant. Respond to the user's questions and requests in a clear, informative, and friendly manner.";
+    "You are a helpful AI assistant. Respond to the user's questions and requests in a clear, informative, and friendly manner. Please respond in 150-200 words only.";
 
 /** Used for rolling conversation summary (memory optimization) */
 export const SYS_SUMMARIZE =

@@ -13,9 +13,8 @@ model User {
   name         String
   passwordHash String
   createdAt    DateTime  @default(now())
-  adTurnMode     String   @default("randomized")
-  adCardVariants String?
-  sessions       Session[]
+  adTurnMode   String    @default("randomized")
+  sessions     Session[]
 }
 
 model Session {

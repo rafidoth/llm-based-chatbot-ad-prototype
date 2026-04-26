@@ -2,7 +2,14 @@ import { NextRequest } from "next/server";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
-const VALID_AD_TURN_MODES = ["randomized", "ordered", "only-in-resp", "only-out-resp"];
+const VALID_AD_TURN_MODES = [
+    "randomized",
+    "ordered",
+    "only-in-resp",
+    "only-out-resp-normal",
+    "only-out-resp-inline",
+    "only-out-resp",
+];
 
 export async function GET() {
     try {
@@ -13,7 +20,7 @@ export async function GET() {
 
         const user = await prisma.user.findUnique({
             where: { id: sessionData.user.id },
-            select: { name: true, email: true, adTurnMode: true, adCardVariants: true },
+            select: { name: true, email: true, adTurnMode: true },
         });
 
         if (!user) {
@@ -35,7 +42,7 @@ export async function PATCH(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { adTurnMode, adCardVariants } = body;
+        const { adTurnMode } = body;
 
         if (adTurnMode && !VALID_AD_TURN_MODES.includes(adTurnMode)) {
             return new Response(
@@ -44,23 +51,12 @@ export async function PATCH(req: NextRequest) {
             );
         }
 
-        // Validate adCardVariants: must be an array of strings if provided
-        if (adCardVariants !== undefined && !Array.isArray(adCardVariants)) {
-            return new Response(
-                JSON.stringify({ error: "adCardVariants must be an array" }),
-                { status: 400 }
-            );
-        }
-
         const updatedUser = await prisma.user.update({
             where: { id: sessionData.user.id },
             data: {
                 ...(adTurnMode && { adTurnMode }),
-                ...(adCardVariants !== undefined && {
-                    adCardVariants: JSON.stringify(adCardVariants),
-                }),
             },
-            select: { name: true, email: true, adTurnMode: true, adCardVariants: true },
+            select: { name: true, email: true, adTurnMode: true },
         });
 
         return Response.json({ user: updatedUser });

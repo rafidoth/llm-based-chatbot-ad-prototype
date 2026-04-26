@@ -31,7 +31,6 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
     const [conversations, setConversations] = useState<Conversation[]>([]);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [isLoadingConversation, setIsLoadingConversation] = useState(false);
-    const [adCardVariants, setAdCardVariants] = useState<string[]>([]);
 
     const {
         messages,
@@ -74,25 +73,6 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
     useEffect(() => {
         fetchConversations();
     }, [fetchConversations]);
-
-    // Fetch user's ad card variant preference
-    useEffect(() => {
-        fetch("/api/user/preferences")
-            .then((res) => (res.ok ? res.json() : null))
-            .then((data) => {
-                if (data?.user?.adCardVariants) {
-                    try {
-                        const parsed = JSON.parse(data.user.adCardVariants);
-                        if (Array.isArray(parsed) && parsed.length > 0) {
-                            setAdCardVariants(parsed);
-                        }
-                    } catch {
-                        // ignore parse errors
-                    }
-                }
-            })
-            .catch(console.error);
-    }, []);
 
     // Load messages when conversation ID is provided (from URL)
     useEffect(() => {
@@ -194,7 +174,6 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
                     onLogout={handleLogout}
                     userName={user.name}
                     userEmail={user.email}
-                    onAdCardVariantsChange={setAdCardVariants}
                 />
             </div>
 
@@ -243,7 +222,7 @@ export function ChatLayout({ user, sessionId, conversationId }: ChatLayoutProps)
                 ) : (
                     /* Chat state: messages list with input pinned at bottom */
                     <>
-                        <MessageList messages={messages} sessionId={sessionId} isLoadingConversation={isLoadingConversation} adCardVariants={adCardVariants} />
+                        <MessageList messages={messages} sessionId={sessionId} isLoadingConversation={isLoadingConversation} />
                         <ChatInput
                             onSend={handleSendMessage}
                             onStop={stopGeneration}

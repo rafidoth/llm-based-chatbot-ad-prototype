@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import { RefreshCw } from "lucide-react";
 import {
-    AD_CARD_VARIANT_MAP,
-    AD_CARD_VARIANT_KEYS,
+    OUT_RESP_MODE_COMPONENT_MAP,
+    OUT_RESP_MODE_KEYS,
+    OUT_RESP_MODE_META,
     type AdCardVariantProps,
 } from "@/components/ads/AdCardVariants";
 
@@ -61,7 +62,7 @@ export default function AdVariantsPage() {
             <div className="mx-auto max-w-3xl px-6 pt-12 pb-8">
                 <div className="flex items-center justify-between mb-2">
                     <h1 className="text-2xl font-bold tracking-tight">
-                        Ad Card Variants
+                        Out-Response Ad Modes
                     </h1>
                     <button
                         onClick={fetchRandomProduct}
@@ -76,7 +77,7 @@ export default function AdVariantsPage() {
                     </button>
                 </div>
                 <p className="text-sm text-zinc-500">
-                    Preview of all ad card styles using a randomly selected
+                    Preview of all out-response ad modes using a randomly selected
                     product from the catalog.
                 </p>
 
@@ -116,9 +117,9 @@ export default function AdVariantsPage() {
 
                 {adProduct && !loading && (
                     <div className="space-y-10">
-                        {AD_CARD_VARIANT_KEYS.map((key) => {
-                            const { component: Variant, label, description } =
-                                AD_CARD_VARIANT_MAP[key];
+                        {OUT_RESP_MODE_KEYS.map((key) => {
+                            const Variant = OUT_RESP_MODE_COMPONENT_MAP[key];
+                            const { label, description } = OUT_RESP_MODE_META[key];
                             return (
                                 <section key={key}>
                                     <div className="mb-3">

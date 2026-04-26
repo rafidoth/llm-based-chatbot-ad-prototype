@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect, useMemo } from "react";
+import { useRef, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { ChatMessage } from "@/hooks/useChat";
 import { MessageBubble } from "./MessageBubble";
@@ -10,28 +10,13 @@ interface MessageListProps {
     messages: ChatMessage[];
     sessionId: string;
     isLoadingConversation?: boolean;
-    adCardVariants?: string[];
 }
 
-export function MessageList({ messages, sessionId, isLoadingConversation, adCardVariants }: MessageListProps) {
+export function MessageList({ messages, sessionId, isLoadingConversation }: MessageListProps) {
     const bottomRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages]);
-
-    // Compute out-resp index for each message (used for ordered variant cycling)
-    // Must be above the early return to respect the Rules of Hooks
-    const outRespIndexMap = useMemo(() => {
-        const map = new Map<string, number>();
-        let idx = 0;
-        for (const msg of messages) {
-            if (msg.adMode === "out-resp" && msg.adData) {
-                map.set(msg.id, idx);
-                idx++;
-            }
-        }
-        return map;
     }, [messages]);
 
     if (isLoadingConversation) {
@@ -53,8 +38,6 @@ export function MessageList({ messages, sessionId, isLoadingConversation, adCard
                             key={message.id}
                             message={message}
                             sessionId={sessionId}
-                            adCardVariants={adCardVariants}
-                            outRespIndex={outRespIndexMap.get(message.id)}
                         />
                     )
                 )}

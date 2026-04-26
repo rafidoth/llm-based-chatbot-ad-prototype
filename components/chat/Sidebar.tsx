@@ -18,7 +18,6 @@ interface SidebarProps {
     onLogout: () => void;
     userName: string;
     userEmail: string;
-    onAdCardVariantsChange?: (variants: string[]) => void;
 }
 
 export function Sidebar({
@@ -29,7 +28,6 @@ export function Sidebar({
     onLogout,
     userName,
     userEmail,
-    onAdCardVariantsChange,
 }: SidebarProps) {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -96,7 +94,6 @@ export function Sidebar({
                 onClose={() => setIsProfileOpen(false)}
                 userName={userName}
                 userEmail={userEmail}
-                onAdCardVariantsChange={onAdCardVariantsChange}
             />
         </>
     );

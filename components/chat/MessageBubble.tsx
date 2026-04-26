@@ -129,11 +129,9 @@ const markdownComponents: Components = {
 export interface MessageBubbleProps {
     message: ChatMessage;
     sessionId: string;
-    adCardVariants?: string[];
-    outRespIndex?: number;
 }
 
-export function MessageBubble({ message, sessionId, adCardVariants, outRespIndex }: MessageBubbleProps) {
+export function MessageBubble({ message, sessionId }: MessageBubbleProps) {
     const isUser = message.role === "user";
     const isInResp = message.adMode === "in-resp" && message.adData;
 
@@ -187,16 +185,16 @@ export function MessageBubble({ message, sessionId, adCardVariants, outRespIndex
 
                         {/* OUT-RESP: Show sponsored ad card below the message */}
                         {!isUser &&
-                            message.adMode === "out-resp" &&
+                            (message.adMode === "out-resp-normal" ||
+                                message.adMode === "out-resp-inline" ||
+                                message.adMode === "out-resp") &&
                             message.adData &&
                             !message.isStreaming && (
                                 <SponsoredAdCard
                                     product={message.adData.product}
                                     messageId={message.adData.messageId}
                                     sessionId={sessionId}
-                                    adMode="out-resp"
-                                    selectedVariants={adCardVariants}
-                                    outRespIndex={outRespIndex}
+                                    adMode={message.adMode}
                                 />
                             )}
 

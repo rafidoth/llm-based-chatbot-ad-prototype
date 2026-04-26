@@ -14,6 +14,13 @@ import { updateConversationSummary } from "@/lib/summarize";
 const MODEL = "openai/gpt-oss-120b";
 // const MODEL = "qwen/qwen3-32b";
 
+function normalizeLegacyOutRespMode(mode: string): string {
+    if (mode === "out-resp") {
+        return "out-resp-normal";
+    }
+    return mode;
+}
+
 export async function POST(req: NextRequest) {
     try {
         const sessionData = await getSession();
@@ -66,7 +73,7 @@ export async function POST(req: NextRequest) {
         const assistantCount = conversation.messages.filter(
             (m: { role: string }) => m.role === "assistant"
         ).length;
-        const adMode = getAdModeForTurn(assistantCount, adTurnMode);
+        const adMode = normalizeLegacyOutRespMode(getAdModeForTurn(assistantCount, adTurnMode));
 
         // Save user message
         await prisma.message.create({
@@ -200,8 +207,8 @@ export async function POST(req: NextRequest) {
             }
         }
 
-        // ──────────────── OUT-RESP MODE ────────────────
-        if (adMode === "out-resp") {
+        // ──────────────── OUT-RESP MODES ────────────────
+        if (adMode === "out-resp-normal" || adMode === "out-resp-inline") {
             const result = streamText({
                 model: groq(MODEL),
                 system: SYS_DEFAULT,
@@ -224,7 +231,7 @@ export async function POST(req: NextRequest) {
                             conversationId,
                             role: "assistant",
                             content: fullResponse,
-                            adMode: "out-resp",
+                            adMode,
                             adProductName: product?.name || null,
                             adCategory: matchedCategory || null,
                             adProductUrl: product?.url || null,
@@ -243,7 +250,7 @@ export async function POST(req: NextRequest) {
                         const adData = JSON.stringify({
                             type: "ad_data",
                             messageId: savedMessage.id,
-                            adMode: "out-resp",
+                            adMode,
                             product: {
                                 name: product.name,
                                 url: product.url,
@@ -274,7 +281,7 @@ export async function POST(req: NextRequest) {
             return new Response(pipedStream, {
                 headers: {
                     "Content-Type": "text/plain; charset=utf-8",
-                    "X-Ad-Mode": "out-resp",
+                    "X-Ad-Mode": adMode,
                 },
             });
         }
