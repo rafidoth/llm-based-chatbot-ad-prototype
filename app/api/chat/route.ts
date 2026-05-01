@@ -38,17 +38,21 @@ function buildAdTargetingContext(
         return latestMessage;
     }
 
-    const recentMessages = previousMessages.slice(-3)
+    const recentMessages = previousMessages
+        .filter((m) => m.role === "user" || m.role === "assistant")
+        .slice(-6)
         .map((m) => `${m.role}: ${m.content}`)
         .join("\n");
 
-    return [
+    const contextualHistory = [
         previousSummary ? `Summary:\n${previousSummary}` : "",
         recentMessages ? `Recent conversation:\n${recentMessages}` : "",
-        `Latest user message:\n${latestMessage}`,
     ]
         .filter(Boolean)
         .join("\n\n");
+
+    // For new/empty conversations, fall back so ad generation still works.
+    return contextualHistory || latestMessage;
 }
 
 export async function POST(req: NextRequest) {
