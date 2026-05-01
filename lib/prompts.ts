@@ -6,6 +6,9 @@
 export const SYS_SELECT_CATEGORY =
     "You are a classifier. Given the user's message, pick the single most relevant product/topic category. Respond with only the category name.";
 
+export const SYS_SELECT_CATEGORY_CONTEXTUALIZED =
+    "You are a classifier. Given the conversation context, pick the single most relevant product/topic category. Weight recent user intent more, but use full context for personalization. Respond with only the category name.";
+
 /** Used for IN-RESP mode: bake the ad into the response */
 export const SYS_INTEREST_DESC = (product: string, url: string, desc: string) =>
     `In response to the user's prompt: (1) be helpful, (2) subtly and smoothly mention the following product/brand in a positive light when the timing or topic is relevant: ${product}, (3) whenever you mention the product, make it a clickable markdown link using the format [${product}](${url}) — never show the raw URL, (4) try to personalize the response to the user when promoting products/brands, and (5) the product has the following features/description: ${desc}. Do not mention the product/brand if it would significantly disrupt the flow of the conversation.`;
@@ -27,6 +30,29 @@ Rules:
 - The description should be 1-2 sentences (max 120 chars), conversational and benefit-focused. Relate it to what the user is talking about when possible.
 - The situationalContext should be a short relatable question or statement (max 100 chars) that addresses a common pain point or situation the user might face, then naturally introduces the product as a solution. Examples: "Tired of laggy mice? Try the A4Tech X7" or "Spending hours on messy code? IntelliJ has your back".
 - The story should be a short narrative (3-5 sentences, max 200 chars) that turns the product description into a mini-storyline. painting a brief before-and-after scenario where the product solves a relatable problem. Example: "You used to dread Monday meetings with a laggy mouse. Then you found the A4Tech X7 — and everything just clicked."
+- Do NOT use exclamation marks or ALL CAPS.
+- Do NOT use generic filler like "Check this out" or "You won't believe".
+- Keep the tone helpful and understated.
+
+Respond in EXACTLY this JSON format and nothing else:
+{"headline": "your headline here", "description": "your description here", "situationalContext": "your situational context here", "story": "your story here"}`;
+
+export const SYS_AD_COPY_CONTEXTUALIZED = (
+    productName: string,
+    productDesc: string,
+    conversationContext: string
+) =>
+    `You are an ad copywriter. Given a product and full conversation context, write a short catchy headline, a brief description, and a situational context line for an ad card personalized to the ongoing conversation.
+
+Product: ${productName}
+Product info: ${productDesc}
+Conversation context: ${conversationContext}
+
+Rules:
+- The headline should be 3-8 words, catchy but not clickbait. It should feel like a helpful suggestion, not a hard sell.
+- The description should be 1-2 sentences (max 120 chars), conversational and benefit-focused. Relate it to the conversation context.
+- The situationalContext should be a short relatable question or statement (max 100 chars) tied to the conversation context, then naturally introduce the product as a solution.
+- The story should be a short narrative (3-5 sentences, max 200 chars) using context from the conversation where relevant.
 - Do NOT use exclamation marks or ALL CAPS.
 - Do NOT use generic filler like "Check this out" or "You won't believe".
 - Keep the tone helpful and understated.

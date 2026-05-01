@@ -8,7 +8,14 @@ import {
     getAllCategories,
     getRandomProductFromCategory,
 } from "@/lib/products";
-import { SYS_SELECT_CATEGORY, SYS_INTEREST_DESC, SYS_DEFAULT, SYS_AD_COPY } from "@/lib/prompts";
+import {
+    SYS_SELECT_CATEGORY,
+    SYS_SELECT_CATEGORY_CONTEXTUALIZED,
+    SYS_INTEREST_DESC,
+    SYS_DEFAULT,
+    SYS_AD_COPY,
+    SYS_AD_COPY_CONTEXTUALIZED,
+} from "@/lib/prompts";
 import { updateConversationSummary } from "@/lib/summarize";
 
 const MODEL = "openai/gpt-oss-120b";
@@ -19,6 +26,29 @@ function normalizeLegacyOutRespMode(mode: string): string {
         return "out-resp-normal";
     }
     return mode;
+}
+
+function buildAdTargetingContext(
+    previousSummary: string | null,
+    previousMessages: Array<{ role: string; content: string }>,
+    latestMessage: string,
+    adTargetingMode: string
+): string {
+    if (adTargetingMode !== "contextualized") {
+        return latestMessage;
+    }
+
+    const recentMessages = previousMessages.slice(-8)
+        .map((m) => `${m.role}: ${m.content}`)
+        .join("\n");
+
+    return [
+        previousSummary ? `Summary:\n${previousSummary}` : "",
+        recentMessages ? `Recent conversation:\n${recentMessages}` : "",
+        `Latest user message:\n${latestMessage}`,
+    ]
+        .filter(Boolean)
+        .join("\n\n");
 }
 
 export async function POST(req: NextRequest) {
@@ -62,18 +92,25 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // Fetch user's ad turn mode preference
+        // Fetch user's ad preferences
         const user = await prisma.user.findUnique({
             where: { id: sessionData.user.id },
-            select: { adTurnMode: true },
+            select: { adTurnMode: true, adTargetingMode: true },
         });
         const adTurnMode = (user?.adTurnMode || "randomized") as AdTurnMode;
+        const adTargetingMode = user?.adTargetingMode || "turn";
 
         // Determine ad mode based on number of assistant messages so far
         const assistantCount = conversation.messages.filter(
             (m: { role: string }) => m.role === "assistant"
         ).length;
         const adMode = normalizeLegacyOutRespMode(getAdModeForTurn(assistantCount, adTurnMode));
+        const adTargetingContext = buildAdTargetingContext(
+            previousSummary,
+            conversation.messages,
+            message,
+            adTargetingMode
+        );
 
         // Save user message
         await prisma.message.create({
@@ -169,8 +206,11 @@ export async function POST(req: NextRequest) {
             const { output: selectedCategory } = await generateText({
                 model: groq(MODEL),
                 output: Output.choice({ options: categories }),
-                system: SYS_SELECT_CATEGORY,
-                messages: [{ role: "user", content: message }],
+                system:
+                    adTargetingMode === "contextualized"
+                        ? SYS_SELECT_CATEGORY_CONTEXTUALIZED
+                        : SYS_SELECT_CATEGORY,
+                messages: [{ role: "user", content: adTargetingContext }],
             });
             matchedCategory = selectedCategory;
         } catch (e) {
@@ -190,7 +230,10 @@ export async function POST(req: NextRequest) {
             try {
                 const { text: adCopyRaw } = await generateText({
                     model: groq(MODEL),
-                    system: SYS_AD_COPY(product.name, product.desc, message),
+                    system:
+                        adTargetingMode === "contextualized"
+                            ? SYS_AD_COPY_CONTEXTUALIZED(product.name, product.desc, adTargetingContext)
+                            : SYS_AD_COPY(product.name, product.desc, message),
                     messages: [{ role: "user", content: "Generate the ad copy now." }],
                 });
                 const parsed = JSON.parse(adCopyRaw);
@@ -208,7 +251,11 @@ export async function POST(req: NextRequest) {
         }
 
         // ──────────────── OUT-RESP MODES ────────────────
-        if (adMode === "out-resp-normal" || adMode === "out-resp-inline") {
+        if (
+            adMode === "out-resp-normal" ||
+            adMode === "out-resp-inline" ||
+            adMode === "out-panel-right"
+        ) {
             const result = streamText({
                 model: groq(MODEL),
                 system: SYS_DEFAULT,

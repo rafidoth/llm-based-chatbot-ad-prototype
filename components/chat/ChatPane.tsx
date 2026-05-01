@@ -5,16 +5,21 @@ import { useRouter } from "next/navigation";
 import { ChatInput } from "./ChatInput";
 import { MessageList } from "./MessageList";
 import { useChat } from "@/hooks/useChat";
+import { RightAdPanel } from "@/components/ads/RightAdPanel";
 
 interface ChatPaneProps {
     conversationId: string | null;
     sessionId: string;
+    rightAdPanel: boolean;
+    onRightAdPanelChange: (value: boolean) => void;
     onConversationListChanged: () => void;
 }
 
 export const ChatPane = memo(function ChatPane({
     conversationId,
     sessionId,
+    rightAdPanel,
+    onRightAdPanelChange,
     onConversationListChanged,
 }: ChatPaneProps) {
     const router = useRouter();
@@ -39,11 +44,14 @@ export const ChatPane = memo(function ChatPane({
                     if (data?.messages) {
                         setMessages(data.messages);
                     }
+                    if (typeof data?.conversation?.rightAdPanel === "boolean") {
+                        onRightAdPanelChange(data.conversation.rightAdPanel);
+                    }
                 })
                 .catch((e) => console.error("Failed to refresh messages:", e));
         }
         prevIsLoadingRef.current = isLoading;
-    }, [conversationId, isLoading, setMessages]);
+    }, [conversationId, isLoading, onRightAdPanelChange, setMessages]);
 
     useEffect(() => {
         let cancelled = false;
@@ -66,6 +74,9 @@ export const ChatPane = memo(function ChatPane({
                 if (!cancelled && data?.messages) {
                     setMessages(data.messages);
                 }
+                if (!cancelled && typeof data?.conversation?.rightAdPanel === "boolean") {
+                    onRightAdPanelChange(data.conversation.rightAdPanel);
+                }
             } catch (e) {
                 console.error("Failed to load messages:", e);
             } finally {
@@ -80,7 +91,7 @@ export const ChatPane = memo(function ChatPane({
         return () => {
             cancelled = true;
         };
-    }, [conversationId, clearMessages, setMessages]);
+    }, [conversationId, clearMessages, onRightAdPanelChange, setMessages]);
 
     const handleSendMessage = useCallback(
         async (content: string) => {
@@ -95,6 +106,9 @@ export const ChatPane = memo(function ChatPane({
                     if (res.ok) {
                         const data = await res.json();
                         const newId = data.conversation.id as string;
+                        if (typeof data.conversation.rightAdPanel === "boolean") {
+                            onRightAdPanelChange(data.conversation.rightAdPanel);
+                        }
 
                         await sendMessage(content, newId);
                         router.push(`/chat/${newId}`);
@@ -110,7 +124,7 @@ export const ChatPane = memo(function ChatPane({
             await sendMessage(content);
             onConversationListChanged();
         },
-        [conversationId, onConversationListChanged, router, sendMessage]
+        [conversationId, onConversationListChanged, onRightAdPanelChange, router, sendMessage]
     );
 
     if (messages.length === 0 && !streamingMessage && !isLoadingConversation) {
@@ -132,18 +146,26 @@ export const ChatPane = memo(function ChatPane({
     }
 
     return (
-        <>
-            <MessageList
-                messages={messages}
-                streamingMessage={streamingMessage}
+        <div className="relative flex min-h-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col">
+                <MessageList
+                    messages={messages}
+                    streamingMessage={streamingMessage}
+                    sessionId={sessionId}
+                    rightAdPanel={rightAdPanel}
+                    isLoadingConversation={isLoadingConversation}
+                />
+                <ChatInput
+                    onSend={handleSendMessage}
+                    onStop={stopGeneration}
+                    isLoading={isLoading}
+                />
+            </div>
+            <RightAdPanel
+                messages={streamingMessage ? [...messages, streamingMessage] : messages}
                 sessionId={sessionId}
-                isLoadingConversation={isLoadingConversation}
+                rightAdPanel={rightAdPanel}
             />
-            <ChatInput
-                onSend={handleSendMessage}
-                onStop={stopGeneration}
-                isLoading={isLoading}
-            />
-        </>
+        </div>
     );
 });

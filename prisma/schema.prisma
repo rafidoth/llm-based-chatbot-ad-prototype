@@ -14,6 +14,7 @@ model User {
   passwordHash String
   createdAt    DateTime  @default(now())
   adTurnMode   String    @default("randomized")
+  adTargetingMode String @default("turn")
   sessions     Session[]
 }
 
@@ -34,6 +35,7 @@ model Conversation {
   sessionId String
   title     String?
   summary   String?
+  rightAdPanel Boolean @default(false) @map("right_ad_panel")
   createdAt DateTime  @default(now())
   session   Session   @relation(fields: [sessionId], references: [id])
   messages  Message[]

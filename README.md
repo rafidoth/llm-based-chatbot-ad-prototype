@@ -14,3 +14,13 @@ run the development server:
 ```bash
 npm run dev
 ```
+
+## Database notes
+
+If Prisma migration history is not baselined in your database, `prisma migrate deploy` can fail with `P3005` while runtime still needs latest columns.
+
+Apply runtime hotfix SQL:
+
+```bash
+pnpm prisma db execute --file scripts/migrate-hotfix.sql
+```

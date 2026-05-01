@@ -21,6 +21,7 @@ export default async function ChatRouteLayout({ children }: ChatRouteLayoutProps
         select: {
             id: true,
             title: true,
+            rightAdPanel: true,
             createdAt: true,
         },
     });

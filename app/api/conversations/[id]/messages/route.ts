@@ -20,6 +20,10 @@ export async function GET(
                 id: conversationId,
                 session: { userId: sessionData.user.id },
             },
+            select: {
+                id: true,
+                rightAdPanel: true,
+            },
         });
 
         if (!conversation) {
@@ -74,7 +78,13 @@ export async function GET(
                     : null,
         }));
 
-        return NextResponse.json({ messages: formattedMessages });
+        return NextResponse.json({
+            conversation: {
+                id: conversation.id,
+                rightAdPanel: conversation.rightAdPanel,
+            },
+            messages: formattedMessages,
+        });
     } catch (error) {
         console.error("Load messages error:", error);
         return NextResponse.json(

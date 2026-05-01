@@ -10,6 +10,7 @@ interface MessageListProps {
     messages: ChatMessage[];
     streamingMessage: ChatMessage | null;
     sessionId: string;
+    rightAdPanel: boolean;
     isLoadingConversation?: boolean;
 }
 
@@ -17,6 +18,7 @@ function MessageListComponent({
     messages,
     streamingMessage,
     sessionId,
+    rightAdPanel,
     isLoadingConversation,
 }: MessageListProps) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -64,6 +66,7 @@ function MessageListComponent({
                         key={message.id}
                         message={message}
                         sessionId={sessionId}
+                        rightAdPanel={rightAdPanel}
                     />
                 ))}
                 {streamingMessage ? (

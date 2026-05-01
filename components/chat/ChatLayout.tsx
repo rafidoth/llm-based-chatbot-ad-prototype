@@ -9,6 +9,7 @@ import { Menu, X } from "lucide-react";
 interface Conversation {
     id: string;
     title: string | null;
+    rightAdPanel: boolean;
     createdAt: string;
 }
 
@@ -29,6 +30,8 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
     const pathname = usePathname();
     const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
     const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [rightAdPanel, setRightAdPanel] = useState(false);
+    const [isSavingRightAdPanel, setIsSavingRightAdPanel] = useState(false);
 
     const activeConversationId = useMemo(() => {
         const segments = pathname.split("/").filter(Boolean);
@@ -96,6 +99,51 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
         }
     }, [router]);
 
+    useEffect(() => {
+        if (!activeConversationId) {
+            setRightAdPanel(false);
+            return;
+        }
+
+        const conversation = conversations.find((item) => item.id === activeConversationId);
+        if (conversation) {
+            setRightAdPanel(conversation.rightAdPanel);
+        }
+    }, [activeConversationId, conversations]);
+
+    const handleRightPanelToggle = useCallback(async () => {
+        if (!activeConversationId || isSavingRightAdPanel) return;
+
+        const nextValue = !rightAdPanel;
+        setRightAdPanel(nextValue);
+        setIsSavingRightAdPanel(true);
+
+        try {
+            const res = await fetch(`/api/conversations/${activeConversationId}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ rightAdPanel: nextValue }),
+            });
+
+            if (!res.ok) {
+                throw new Error(`Failed to save rightAdPanel: ${res.status}`);
+            }
+
+            setConversations((prev) =>
+                prev.map((conversation) =>
+                    conversation.id === activeConversationId
+                        ? { ...conversation, rightAdPanel: nextValue }
+                        : conversation
+                )
+            );
+        } catch (error) {
+            console.error("Failed to update right ad panel setting:", error);
+            setRightAdPanel(!nextValue);
+        } finally {
+            setIsSavingRightAdPanel(false);
+        }
+    }, [activeConversationId, isSavingRightAdPanel, rightAdPanel]);
+
     return (
         <div className="flex h-screen bg-[#212121]">
             {/* Mobile sidebar toggle */}
@@ -116,9 +164,12 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
                 <Sidebar
                     conversations={conversations}
                     activeConversationId={activeConversationId}
+                    rightAdPanel={rightAdPanel}
+                    isSavingRightAdPanel={isSavingRightAdPanel}
                     onSelectConversation={handleSelectConversation}
                     onNewChat={handleNewChat}
                     onLogout={handleLogout}
+                    onToggleRightAdPanel={handleRightPanelToggle}
                     userName={user.name}
                     userEmail={user.email}
                 />
@@ -154,6 +205,8 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
                 <ChatPane
                     conversationId={activeConversationId}
                     sessionId={sessionId}
+                    rightAdPanel={rightAdPanel}
+                    onRightAdPanelChange={setRightAdPanel}
                     onConversationListChanged={fetchConversations}
                 />
             </div>

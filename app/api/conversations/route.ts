@@ -15,6 +15,7 @@ export async function GET() {
             select: {
                 id: true,
                 title: true,
+                rightAdPanel: true,
                 createdAt: true,
             },
         });
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
             data: {
                 sessionId: sessionData.session.id,
                 title,
+                rightAdPanel: Math.random() < 0.5,
             },
         });
 

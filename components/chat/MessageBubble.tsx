@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, ReactNode, useMemo, useState } from "react";
 import ReactMarkdown, { Components } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/hooks/useChat";
@@ -10,7 +10,86 @@ import { MessageActions } from "./MessageActions";
 
 const REMARK_PLUGINS = [remarkGfm];
 
-const markdownComponents: Components = {
+type AdProduct = NonNullable<NonNullable<ChatMessage["adData"]>["product"]>;
+
+function normalizeUrl(url: string): string {
+    try {
+        const parsed = new URL(url);
+        const normalizedPath = parsed.pathname.replace(/\/+$/, "") || "/";
+        return `${parsed.hostname}${normalizedPath}${parsed.search}`;
+    } catch {
+        return url.replace(/\/+$/, "");
+    }
+}
+
+function isMatchingProductLink(href?: string, productUrl?: string): boolean {
+    if (!href || !productUrl) return false;
+    return normalizeUrl(href) === normalizeUrl(productUrl);
+}
+
+interface InRespAdHoverLinkProps {
+    href?: string;
+    children: ReactNode;
+    product: AdProduct | null;
+    enabled: boolean;
+}
+
+function InRespAdHoverLink({ href, children, product, enabled }: InRespAdHoverLinkProps) {
+    const [showCard, setShowCard] = useState(false);
+    const shouldShowAdPopover = enabled && !!product && isMatchingProductLink(href, product.url);
+
+    if (!shouldShowAdPopover) {
+        return (
+            <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-emerald-400 font-medium no-underline hover:text-emerald-300 hover:underline transition-colors cursor-pointer"
+            >
+                {children}
+            </a>
+        );
+    }
+
+    return (
+        <span
+            className="relative inline-block align-baseline"
+            onMouseEnter={() => setShowCard(true)}
+            onMouseLeave={() => setShowCard(false)}
+        >
+            <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold text-emerald-300 no-underline transition-colors duration-200 hover:text-emerald-200 hover:underline"
+            >
+                {children}
+            </a>
+
+            {showCard && (
+                <span
+                    role="tooltip"
+                    className="absolute left-0 top-full z-20 mt-2 block w-80 max-w-[85vw] rounded-lg border border-sky-400/35 bg-gradient-to-br from-sky-900/70 via-blue-900/65 to-cyan-900/55 px-4 py-3 shadow-lg shadow-sky-900/30 backdrop-blur-sm animate-in fade-in slide-in-from-top-1 duration-200"
+                >
+                    <span className="mb-2 flex items-center justify-between">
+                        <span className="text-[10px] font-medium uppercase tracking-wider text-sky-200/70">
+                            Sponsored
+                        </span>
+                    </span>
+                    <span className="mb-1 block text-[18px] font-bold text-white">{product.name}</span>
+                    <span className="mb-1 block text-[14px] font-semibold leading-snug text-sky-100">
+                        {product.headline || product.name}
+                    </span>
+                    <span className="mb-3 block text-sm leading-relaxed text-zinc-100/90">
+                        {product.description || product.desc}
+                    </span>
+                </span>
+            )}
+        </span>
+    );
+}
+
+const baseMarkdownComponents: Components = {
     // Paragraphs
     p: ({ children }) => (
         <p className="my-3 leading-7 first:mt-0 last:mb-0">{children}</p>
@@ -129,11 +208,28 @@ const markdownComponents: Components = {
 export interface MessageBubbleProps {
     message: ChatMessage;
     sessionId: string;
+    rightAdPanel: boolean;
 }
 
-function MessageBubbleComponent({ message, sessionId }: MessageBubbleProps) {
+function MessageBubbleComponent({ message, sessionId, rightAdPanel }: MessageBubbleProps) {
     const isUser = message.role === "user";
     const isInResp = message.adMode === "in-resp" && message.adData;
+    const adProduct = isInResp ? message.adData?.product || null : null;
+
+    const markdownComponents = useMemo<Components>(() => {
+        return {
+            ...baseMarkdownComponents,
+            a: ({ href, children }) => (
+                <InRespAdHoverLink
+                    href={href}
+                    product={adProduct}
+                    enabled={Boolean(isInResp)}
+                >
+                    {children}
+                </InRespAdHoverLink>
+            ),
+        };
+    }, [adProduct, isInResp]);
 
     // For IN-RESP mode, track the entire message bubble
     const { ref: inRespRef } = useAdTracking(
@@ -172,6 +268,7 @@ function MessageBubbleComponent({ message, sessionId }: MessageBubbleProps) {
 
                         {/* OUT-RESP: Show sponsored ad card below the message */}
                         {!isUser &&
+                            !rightAdPanel &&
                             (message.adMode === "out-resp-normal" ||
                                 message.adMode === "out-resp-inline" ||
                                 message.adMode === "out-resp") &&
@@ -209,6 +306,7 @@ export const MessageBubble = memo(
         prev.message.role === next.message.role &&
         prev.message.content === next.message.content &&
         prev.message.adMode === next.message.adMode &&
+        prev.rightAdPanel === next.rightAdPanel &&
         prev.message.isStreaming === next.message.isStreaming &&
         prev.message.adData === next.message.adData
 );

@@ -8,8 +8,11 @@ const VALID_AD_TURN_MODES = [
     "only-in-resp",
     "only-out-resp-normal",
     "only-out-resp-inline",
+    "only-out-panel-right",
     "only-out-resp",
 ];
+
+const VALID_AD_TARGETING_MODES = ["turn", "contextualized"];
 
 export async function GET() {
     try {
@@ -20,7 +23,7 @@ export async function GET() {
 
         const user = await prisma.user.findUnique({
             where: { id: sessionData.user.id },
-            select: { name: true, email: true, adTurnMode: true },
+            select: { name: true, email: true, adTurnMode: true, adTargetingMode: true },
         });
 
         if (!user) {
@@ -42,7 +45,7 @@ export async function PATCH(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { adTurnMode } = body;
+        const { adTurnMode, adTargetingMode } = body;
 
         if (adTurnMode && !VALID_AD_TURN_MODES.includes(adTurnMode)) {
             return new Response(
@@ -51,12 +54,20 @@ export async function PATCH(req: NextRequest) {
             );
         }
 
+        if (adTargetingMode && !VALID_AD_TARGETING_MODES.includes(adTargetingMode)) {
+            return new Response(
+                JSON.stringify({ error: "Invalid ad targeting mode" }),
+                { status: 400 }
+            );
+        }
+
         const updatedUser = await prisma.user.update({
             where: { id: sessionData.user.id },
             data: {
                 ...(adTurnMode && { adTurnMode }),
+                ...(adTargetingMode && { adTargetingMode }),
             },
-            select: { name: true, email: true, adTurnMode: true },
+            select: { name: true, email: true, adTurnMode: true, adTargetingMode: true },
         });
 
         return Response.json({ user: updatedUser });

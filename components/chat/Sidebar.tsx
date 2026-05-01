@@ -13,9 +13,12 @@ interface Conversation {
 interface SidebarProps {
     conversations: Conversation[];
     activeConversationId: string | null;
+    rightAdPanel: boolean;
+    isSavingRightAdPanel: boolean;
     onSelectConversation: (id: string) => void;
     onNewChat: () => void;
     onLogout: () => void;
+    onToggleRightAdPanel: () => void;
     userName: string;
     userEmail: string;
 }
@@ -23,9 +26,12 @@ interface SidebarProps {
 function SidebarComponent({
     conversations,
     activeConversationId,
+    rightAdPanel,
+    isSavingRightAdPanel,
     onSelectConversation,
     onNewChat,
     onLogout,
+    onToggleRightAdPanel,
     userName,
     userEmail,
 }: SidebarProps) {
@@ -92,6 +98,10 @@ function SidebarComponent({
             <UserProfileModal
                 isOpen={isProfileOpen}
                 onClose={() => setIsProfileOpen(false)}
+                activeConversationId={activeConversationId}
+                rightAdPanel={rightAdPanel}
+                isSavingRightAdPanel={isSavingRightAdPanel}
+                onToggleRightAdPanel={onToggleRightAdPanel}
                 userName={userName}
                 userEmail={userEmail}
             />
@@ -104,9 +114,12 @@ export const Sidebar = memo(
     (prev, next) =>
         prev.conversations === next.conversations &&
         prev.activeConversationId === next.activeConversationId &&
+        prev.rightAdPanel === next.rightAdPanel &&
+        prev.isSavingRightAdPanel === next.isSavingRightAdPanel &&
         prev.onSelectConversation === next.onSelectConversation &&
         prev.onNewChat === next.onNewChat &&
         prev.onLogout === next.onLogout &&
+        prev.onToggleRightAdPanel === next.onToggleRightAdPanel &&
         prev.userName === next.userName &&
         prev.userEmail === next.userEmail
 );
