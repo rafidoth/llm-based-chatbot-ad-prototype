@@ -151,7 +151,7 @@ export function UserProfileModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="bg-[#1e1e1e] border-zinc-700/50 sm:max-w-lg">
+            <DialogContent className="h-[80vh] max-h-[80vh] overflow-y-auto bg-[#1e1e1e] border-zinc-700/50 sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-zinc-100">
                         <Settings size={18} className="text-zinc-400" />
