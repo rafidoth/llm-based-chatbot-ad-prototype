@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Check, PanelRight, Settings } from "lucide-react";
+import { Check, Settings } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -13,10 +13,6 @@ import {
 interface UserProfileModalProps {
     isOpen: boolean;
     onClose: () => void;
-    activeConversationId: string | null;
-    rightAdPanel: boolean;
-    isSavingRightAdPanel: boolean;
-    onToggleRightAdPanel: () => void;
     userName: string;
     userEmail: string;
 }
@@ -47,11 +43,6 @@ const AD_TURN_OPTIONS = [
         label: "Only OUT-RESP Inline",
         description: "Always show inline ad cards",
     },
-    {
-        value: "only-out-panel-right",
-        label: "Only OUT-PANEL Right",
-        description: "Always show ads in right panel",
-    },
 ] as const;
 
 const AD_TARGETING_OPTIONS = [
@@ -71,16 +62,15 @@ function normalizeAdTurnMode(mode: string): string {
     if (mode === "only-out-resp") {
         return "only-out-resp-normal";
     }
+    if (mode === "only-out-panel-right") {
+        return "only-out-resp-normal";
+    }
     return mode;
 }
 
 export function UserProfileModal({
     isOpen,
     onClose,
-    activeConversationId,
-    rightAdPanel,
-    isSavingRightAdPanel,
-    onToggleRightAdPanel,
     userName,
     userEmail,
 }: UserProfileModalProps) {
@@ -275,33 +265,6 @@ export function UserProfileModal({
                         </div>
                     </div>
 
-                    <div className="mt-5">
-                        <h3 className="text-sm font-semibold text-zinc-200 mb-2">
-                            Right Ad Panel
-                        </h3>
-
-                        <button
-                            type="button"
-                            onClick={onToggleRightAdPanel}
-                            disabled={!activeConversationId || isSavingRightAdPanel}
-                            className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg border border-zinc-700/30 px-3 py-2 text-left transition-all duration-200 hover:bg-zinc-800/50 hover:border-zinc-600/40 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-zinc-800 text-zinc-300">
-                                <PanelRight size={13} />
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                                <p className="text-xs font-medium text-zinc-300">
-                                    {rightAdPanel ? "Enabled" : "Disabled"}
-                                </p>
-                                <p className="text-[11px] text-zinc-500 leading-tight">
-                                    {activeConversationId
-                                        ? "Move out-response ads between side panel and inline cards"
-                                        : "Open a conversation to change this setting"}
-                                </p>
-                            </div>
-                        </button>
-                    </div>
                 </div>
             </DialogContent>
         </Dialog>

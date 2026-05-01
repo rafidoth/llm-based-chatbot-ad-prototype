@@ -8,7 +8,6 @@ const VALID_AD_TURN_MODES = [
     "only-in-resp",
     "only-out-resp-normal",
     "only-out-resp-inline",
-    "only-out-panel-right",
     "only-out-resp",
 ];
 

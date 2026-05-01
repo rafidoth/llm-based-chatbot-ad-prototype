@@ -17,7 +17,6 @@ export type AdTurnMode =
     | "only-in-resp"
     | "only-out-resp-normal"
     | "only-out-resp-inline"
-    | "only-out-panel-right"
     | "only-out-resp";
 
 // Default schedule for ordered mode: cycles through modes
@@ -55,8 +54,6 @@ export function getAdModeForTurn(
             return "out-resp-normal";
         case "only-out-resp-inline":
             return "out-resp-inline";
-        case "only-out-panel-right":
-            return "out-panel-right";
         default:
             return AD_MODE_SCHEDULE[turnIndex % AD_MODE_SCHEDULE.length];
     }

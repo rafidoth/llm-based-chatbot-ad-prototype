@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./Sidebar";
 import { ChatPane } from "./ChatPane";
-import { Menu, X } from "lucide-react";
+import { Menu, PanelRight, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Conversation {
     id: string;
@@ -164,12 +165,9 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
                 <Sidebar
                     conversations={conversations}
                     activeConversationId={activeConversationId}
-                    rightAdPanel={rightAdPanel}
-                    isSavingRightAdPanel={isSavingRightAdPanel}
                     onSelectConversation={handleSelectConversation}
                     onNewChat={handleNewChat}
                     onLogout={handleLogout}
-                    onToggleRightAdPanel={handleRightPanelToggle}
                     userName={user.name}
                     userEmail={user.email}
                 />
@@ -200,6 +198,15 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
                             r5Chat
                         </h1>
                     </div>
+                    <button
+                        type="button"
+                        onClick={handleRightPanelToggle}
+                        disabled={!activeConversationId || isSavingRightAdPanel}
+                        className={cn("inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-700/50 px-3 py-1.5 text-xs transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60", rightAdPanel ? "text-white bg-zinc-800" : "text-zinc-300")}
+                    >
+                        <PanelRight size={14} />
+                        Ad Panel
+                    </button>
                 </header>
 
                 <ChatPane
