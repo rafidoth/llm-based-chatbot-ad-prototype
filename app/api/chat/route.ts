@@ -38,7 +38,7 @@ function buildAdTargetingContext(
         return latestMessage;
     }
 
-    const recentMessages = previousMessages.slice(-8)
+    const recentMessages = previousMessages.slice(-3)
         .map((m) => `${m.role}: ${m.content}`)
         .join("\n");
 
