@@ -202,7 +202,7 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
                         type="button"
                         onClick={handleRightPanelToggle}
                         disabled={!activeConversationId || isSavingRightAdPanel}
-                        className={cn("inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-700/50 px-3 py-1.5 text-xs transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60", rightAdPanel ? "text-white bg-zinc-800" : "text-zinc-300")}
+                        className={cn("inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-700/50 px-3 py-1.5 text-xs transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60", rightAdPanel ? "text-white bg-zinc-800 font-bold" : "text-zinc-300")}
                     >
                         <PanelRight size={14} />
                         Ad Panel
