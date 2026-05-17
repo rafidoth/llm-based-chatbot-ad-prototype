@@ -20,27 +20,27 @@ interface UserProfileModalProps {
 const AD_TURN_OPTIONS = [
     {
         value: "randomized",
-        label: "Smart Mix",
-        description: "Choose an ad format randomly each turn.",
+        label: "Mixed Ad Formats",
+        description: "Ad format gets chosen randlomly in each turn",
     },
     {
         value: "ordered",
-        label: "Rotate Formats",
+        label: "Ordered Rotation of Ad Formats",
         description: "Cycle through ad formats in a fixed order.",
     },
     {
         value: "only-in-resp",
-        label: "In-Reply Ads Only",
-        description: "Always place ads inside assistant replies.",
+        label: "Ads Placed in Assistant Response",
+        description: "Always ads are placed inside assistant replies.",
     },
     {
         value: "only-out-resp-normal",
-        label: "Standard Cards Only",
+        label: "Standard Card Format Ads",
         description: "Always show standard ad cards outside replies.",
     },
     {
         value: "only-out-resp-inline",
-        label: "Inline Cards Only",
+        label: "Inline Ad Cards",
         description: "Always show inline ad cards outside replies.",
     },
 ] as const;
@@ -49,12 +49,12 @@ const AD_TARGETING_OPTIONS = [
     {
         value: "turn",
         label: "Per Turn",
-        description: "Target ads from latest message",
+        description: "Target ad comes from latest message only",
     },
     {
         value: "contextualized",
         label: "Contextualized",
-        description: "Target ads from whole conversation",
+        description: "Target ad comes from whole conversation summary",
     },
 ] as const;
 
