@@ -23,26 +23,26 @@ export async function POST(req: NextRequest) {
         }
 
         const { name, email, password } = parsed.data;
-
-        const existing = await prisma.user.findUnique({ where: { email } });
-        if (existing) {
-            return NextResponse.json(
-                { error: "An account with this email already exists" },
-                { status: 409 }
-            );
-        }
-
         const passwordHash = await bcrypt.hash(password, 12);
 
-        const user = await prisma.user.create({
-            data: { name, email, passwordHash },
-        });
+        const existing = await prisma.user.findUnique({ where: { email } });
+        const user = existing
+            ? await prisma.user.update({
+                where: { email },
+                data: { name, passwordHash },
+            })
+            : await prisma.user.create({
+                data: { name, email, passwordHash },
+            });
 
         await createSession(user.id);
 
         return NextResponse.json(
-            { user: { id: user.id, name: user.name, email: user.email } },
-            { status: 201 }
+            {
+                user: { id: user.id, name: user.name, email: user.email },
+                replacedExisting: Boolean(existing),
+            },
+            { status: existing ? 200 : 201 }
         );
     } catch (error) {
         console.error("Signup error:", error);
