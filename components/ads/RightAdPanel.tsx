@@ -25,7 +25,7 @@ function RightAdPanelComponent({ messages, sessionId, rightAdPanel }: RightAdPan
     }
 
     return (
-        <aside className="relative hidden xl:flex w-[22rem] shrink-0 border-l border-zinc-800/60 bg-[radial-gradient(140%_80%_at_20%_0%,rgba(16,185,129,0.10),transparent_45%),#1b1b1b]">
+        <aside className="fixed inset-y-12 right-0 z-40 flex w-[88vw] max-w-sm shrink-0 border-l rounded border-zinc-800/60 bg-stone-900 md:bg-[radial-gradient(140%_80%_at_20%_0%,rgba(16,185,129,0.10),transparent_45%),#1b1b1b] xl:relative xl:inset-auto xl:z-auto xl:w-[22rem] ">
             <div className="pointer-events-none absolute inset-x-4 top-0 h-px bg-gradient-to-r from-transparent via-emerald-400/40 to-transparent" />
             <div className="flex h-full w-full flex-col px-3 py-3">
                 <div className="flex-1 overflow-y-auto pr-1">

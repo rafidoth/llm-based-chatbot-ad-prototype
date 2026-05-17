@@ -32,7 +32,7 @@ export function RightPanelTextAdCard({
     return (
         <article
             ref={ref}
-            className="group relative overflow-hidden rounded-xl border border-zinc-700/55 bg-gradient-to-b from-zinc-900/70 to-zinc-900/50 p-3.5 shadow-[0_8px_28px_rgba(0,0,0,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-400/35"
+            className="group relative overflow-hidden rounded-xl border border-zinc-700/55 bg-zinc-900 p-3.5 shadow-[0_8px_28px_rgba(0,0,0,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-400/35 xl:bg-gradient-to-b xl:from-zinc-900/70 xl:to-zinc-900/50"
         >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-emerald-300/40 to-transparent" />
             <div className="mb-2 flex items-center justify-between gap-2">

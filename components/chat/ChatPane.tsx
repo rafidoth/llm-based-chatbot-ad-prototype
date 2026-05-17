@@ -12,6 +12,7 @@ interface ChatPaneProps {
     sessionId: string;
     rightAdPanel: boolean;
     onRightAdPanelChange: (value: boolean) => void;
+    onRightAdPanelRequestChange: (value: boolean) => void | Promise<void>;
     onConversationListChanged: () => void;
 }
 
@@ -20,6 +21,7 @@ export const ChatPane = memo(function ChatPane({
     sessionId,
     rightAdPanel,
     onRightAdPanelChange,
+    onRightAdPanelRequestChange,
     onConversationListChanged,
 }: ChatPaneProps) {
     const router = useRouter();
@@ -35,6 +37,22 @@ export const ChatPane = memo(function ChatPane({
     } = useChat(conversationId);
 
     const prevIsLoadingRef = useRef(false);
+    const hasRightPanelAds = messages.some(
+        (message) =>
+            message.role === "assistant" &&
+            (message.adMode === "out-resp-normal" ||
+                message.adMode === "out-resp-inline" ||
+                message.adMode === "out-resp") &&
+            message.adData
+    ) ||
+        Boolean(
+            streamingMessage &&
+                streamingMessage.role === "assistant" &&
+                (streamingMessage.adMode === "out-resp-normal" ||
+                    streamingMessage.adMode === "out-resp-inline" ||
+                    streamingMessage.adMode === "out-resp") &&
+                streamingMessage.adData
+        );
 
     useEffect(() => {
         if (prevIsLoadingRef.current && !isLoading && conversationId) {
@@ -161,6 +179,16 @@ export const ChatPane = memo(function ChatPane({
                     isLoading={isLoading}
                 />
             </div>
+            {rightAdPanel && hasRightPanelAds && (
+                <button
+                    type="button"
+                    aria-label="Close ad panel"
+                    onClick={() => {
+                        void onRightAdPanelRequestChange(false);
+                    }}
+                    className="fixed inset-0 z-30 bg-black/45 xl:hidden"
+                />
+            )}
             <RightAdPanel
                 messages={streamingMessage ? [...messages, streamingMessage] : messages}
                 sessionId={sessionId}

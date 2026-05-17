@@ -20,28 +20,28 @@ interface UserProfileModalProps {
 const AD_TURN_OPTIONS = [
     {
         value: "randomized",
-        label: "Randomized",
-        description: "Random ad mode each turn",
+        label: "Smart Mix",
+        description: "Choose an ad format randomly each turn.",
     },
     {
         value: "ordered",
-        label: "Ordered",
-        description: "Cycle through modes sequentially",
+        label: "Rotate Formats",
+        description: "Cycle through ad formats in a fixed order.",
     },
     {
         value: "only-in-resp",
-        label: "Only IN-RESP",
-        description: "Always embed ads in responses",
+        label: "In-Reply Ads Only",
+        description: "Always place ads inside assistant replies.",
     },
     {
         value: "only-out-resp-normal",
-        label: "Only OUT-RESP Normal",
-        description: "Always show standard ad cards",
+        label: "Standard Cards Only",
+        description: "Always show standard ad cards outside replies.",
     },
     {
         value: "only-out-resp-inline",
-        label: "Only OUT-RESP Inline",
-        description: "Always show inline ad cards",
+        label: "Inline Cards Only",
+        description: "Always show inline ad cards outside replies.",
     },
 ] as const;
 
@@ -211,7 +211,7 @@ export function UserProfileModal({
                                         >
                                             {option.label}
                                         </p>
-                                        <p className="text-[11px] text-zinc-500 leading-tight">
+                                        <p className="text-xs text-zinc-100 leading-snug">
                                             {option.description}
                                         </p>
                                     </div>
@@ -256,7 +256,7 @@ export function UserProfileModal({
                                         >
                                             {option.label}
                                         </p>
-                                        <p className="text-[11px] text-zinc-500 leading-tight">
+                                        <p className="text-xs text-zinc-100 leading-snug">
                                             {option.description}
                                         </p>
                                     </div>

@@ -112,10 +112,10 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
         }
     }, [activeConversationId, conversations]);
 
-    const handleRightPanelToggle = useCallback(async () => {
-        if (!activeConversationId || isSavingRightAdPanel) return;
+    const handleRightPanelChange = useCallback(async (nextValue: boolean) => {
+        if (!activeConversationId || isSavingRightAdPanel || nextValue === rightAdPanel) return;
 
-        const nextValue = !rightAdPanel;
+        const previousValue = rightAdPanel;
         setRightAdPanel(nextValue);
         setIsSavingRightAdPanel(true);
 
@@ -139,11 +139,15 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
             );
         } catch (error) {
             console.error("Failed to update right ad panel setting:", error);
-            setRightAdPanel(!nextValue);
+            setRightAdPanel(previousValue);
         } finally {
             setIsSavingRightAdPanel(false);
         }
     }, [activeConversationId, isSavingRightAdPanel, rightAdPanel]);
+
+    const handleRightPanelToggle = useCallback(() => {
+        void handleRightPanelChange(!rightAdPanel);
+    }, [handleRightPanelChange, rightAdPanel]);
 
     return (
         <div className="flex h-screen bg-[#212121]">
@@ -202,10 +206,10 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
                         type="button"
                         onClick={handleRightPanelToggle}
                         disabled={!activeConversationId || isSavingRightAdPanel}
-                        className={cn("inline-flex cursor-pointer items-center gap-2 rounded-lg border border-zinc-700/50 px-3 py-1.5 text-xs transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60", rightAdPanel ? "text-white bg-zinc-800 font-bold" : "text-zinc-300")}
+                        className={cn("inline-flex cursor-pointer items-center gap-2 rounded-lg px-3 py-1.5 text-xs transition-all duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-60 backdrop-blur-sm", rightAdPanel ? "text-white bg-zinc-800 font-bold border border-zinc-600 shadow-lg shadow-blue-500/20" : "text-zinc-300 bg-zinc-700/80 border border-zinc-600 hover:bg-zinc-700 hover:border-zinc-500 hover:shadow-lg hover:shadow-blue-500/10")}
                     >
                         <PanelRight size={14} />
-                        Ad Panel
+                        Suggested for you
                     </button>
                 </header>
 
@@ -214,6 +218,7 @@ export function ChatLayout({ user, sessionId, initialConversations }: ChatLayout
                     sessionId={sessionId}
                     rightAdPanel={rightAdPanel}
                     onRightAdPanelChange={setRightAdPanel}
+                    onRightAdPanelRequestChange={handleRightPanelChange}
                     onConversationListChanged={fetchConversations}
                 />
             </div>
